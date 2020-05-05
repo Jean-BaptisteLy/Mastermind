@@ -1,5 +1,5 @@
 import random
-from constraint import *
+#from constraint import *
 import copy
 import time
 from copy import deepcopy
@@ -324,6 +324,11 @@ def run():
 
 	difficulte = 0 # 0 quand l'ordinateur joue
 	if joueur == 9:
+		print("Veuillez choisir le nombre de joueurs :")
+		print("1: 1 joueur")
+		print("2: 2 joueurs")
+		nbre_joueurs = int(input())
+
 		print("Veuillez choisir la difficulté :")
 		print("0: facile : sans doublon")
 		print("1: moyen : avec doublon")
@@ -339,28 +344,34 @@ def run():
 		if joueur == 4: # doublons
 			mastermind.create_code_secret_random_v2()
 		elif joueur == 9:
-			if difficulte == 0:
-				print("Premier joueur : Veuillez votre code secret contenant",mastermind.get_n(),"caractères distincts à l'abri des regards :")
-			elif difficulte == 1:
-				print("Premier joueur : Veuillez votre code secret contenant",mastermind.get_n(),"caractères à l'abri des regards :")
-			code_secret_liste = []
-			while(True):
-				temp_str = str(input())
-				if len(temp_str) == n:
-					break
-				else:
-					if difficulte == 0:
-						print("Veuillez ressaisir votre code secret contenant",mastermind.get_n(),"caractères distincts :")
-					elif difficulte == 1:
-						print("Veuillez ressaisir votre code secret contenant",mastermind.get_n(),"caractères :")
-			for i in range(len(temp_str)):
-				code_secret_liste.append(temp_str[i])
-			mastermind.create_code_secret(code_secret_liste)
+			if nbre_joueurs == 1:
+				if difficulte == 0:
+					mastermind.create_code_secret_random()
+				elif difficulte == 1:
+					mastermind.create_code_secret_random_v2()
+			elif nbre_joueurs == 2:
+				if difficulte == 0:
+					print("Premier joueur : Veuillez votre code secret contenant",mastermind.get_n(),"caractères distincts à l'abri des regards :")
+				elif difficulte == 1:
+					print("Premier joueur : Veuillez votre code secret contenant",mastermind.get_n(),"caractères à l'abri des regards :")
+				code_secret_liste = []
+				while(True):
+					temp_str = str(input())
+					if len(temp_str) == n:
+						break
+					else:
+						if difficulte == 0:
+							print("Veuillez ressaisir votre code secret contenant",mastermind.get_n(),"caractères distincts :")
+						elif difficulte == 1:
+							print("Veuillez ressaisir votre code secret contenant",mastermind.get_n(),"caractères :")
+				for i in range(len(temp_str)):
+					code_secret_liste.append(temp_str[i])
+				mastermind.create_code_secret(code_secret_liste)
 		else: # sans doublon
 			mastermind.create_code_secret_random()
 
 		reponse = mastermind.get_code_secret()
-		#print("La réponse est :",reponse)
+		print("La réponse est :",reponse)
 
 		maxsize = 10 # taille maximale de E
 		maxgen = 50 # nombre de générations
