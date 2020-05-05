@@ -371,7 +371,7 @@ def run():
 			mastermind.create_code_secret_random()
 
 		reponse = mastermind.get_code_secret()
-		print("La réponse est :",reponse)
+		#print("La réponse est :",reponse)
 
 		maxsize = 10 # taille maximale de E
 		maxgen = 50 # nombre de générations
