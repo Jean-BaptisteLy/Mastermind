@@ -147,21 +147,44 @@ def compatibilite_doublons(n,states,essai):
 			break
 	return compatible
 
-
-def RAC(i,V,D,n,states):
+def engendrer_et_tester(i,nbreVar,D,n,states):
 	'''
 	i : instanciation courante
-	V : liste de variables non-instanciées dans i
-	D : domaines des variables
-	n et states : les contraintes
+	nbreVar : nombre de variables restantes à instancier
+	D : domaine des variables
+	n, states : contraintes
 	'''
-	if len(V) == 0:
+	if nbreVar == 0:
 		return i
 	else:
-		xk = V[0]
-		V_temp = V.copy()
-		V_temp.remove(xk)
-		for v in D[xk]:
+		nbreVar -= 1
+		for v in D:
+			noeud = i + list(v)
+			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre		
+			if n == len(noeud):
+				i_dico = {}
+				for j in range(len(noeud)):
+					i_dico[j] = noeud[j]
+				if compatibilite_doublons(n,states,i_dico) and len(noeud) == len(set(noeud)): # si le code est compatible, on le prend
+					return i_dico
+			res = engendrer_et_tester(i+list(v),nbreVar,D,n,states)
+			if len(res) == n and compatibilite_doublons(n,states,res) and len(noeud) == len(set(noeud)):
+				i = res
+				break
+	return i
+
+def RAC(i,nbreVar,D,n,states):
+	'''
+	i : instanciation courante
+	nbreVar : nombre de variables restantes à instancier
+	D : domaine des variables
+	n, states : contraintes
+	'''
+	if nbreVar == 0:
+		return i
+	else:
+		nbreVar -= 1
+		for v in D:
 			noeud = i + list(v)
 			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre		
 			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
@@ -171,30 +194,26 @@ def RAC(i,V,D,n,states):
 						i_dico[j] = noeud[j]
 					if compatibilite(n,states,i_dico): # si le code est compatible, on le prend
 						return i_dico
-				res = RAC(i+list(v),V_temp,D,n,states)
+				res = RAC(i+list(v),nbreVar,D,n,states)
 				if len(res) == n and compatibilite(n,states,res):
 					i = res
 					break
 	return i
 
-def RAC_forward_checking(i,V,D,n,states):
+def RAC_forward_checking(i,nbreVar,D,n,states):
 	'''
 	i : instanciation courante
-	V : liste de variables non-instanciées dans i
-	D : domaines des variables
-	n et states : les contraintes
+	nbreVar : nombre de variables restantes à instancier
+	D : domaine des variables
+	n, states : contraintes
 	'''
-	if len(V) == 0:
+	if nbreVar == 0:
 		return i
 	else:
-		xk = V[0]
-		V_temp = V.copy()
-		V_temp.remove(xk)
-		for v in D[xk]:
-			D_bis = deepcopy(D)
-			for d in D_bis:
-				if v in d:
-					d.remove(v)
+		nbreVar -= 1
+		for v in D:
+			D_bis = D.copy()
+			D_bis.remove(v)
 			noeud = i + list(v)
 			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
 			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
@@ -204,34 +223,30 @@ def RAC_forward_checking(i,V,D,n,states):
 						i_dico[j] = noeud[j]
 					if compatibilite(n,states,i_dico): # si le code est compatible, on le prend
 						return i_dico
-				res = RAC_forward_checking(i+list(v),V_temp,D_bis,n,states)
+				res = RAC_forward_checking(i+list(v),nbreVar,D_bis,n,states)
 				if len(res) == n and compatibilite(n,states,res):
 					i = res
 					break
 	return i
 
-def RAC_forward_checking_doublons(i,V,D,n,states,nbre_occurences):
+def RAC_forward_checking_doublons(i,nbreVar,D,n,states,nbre_occurences):
 	'''
 	i : instanciation courante
-	V : liste de variables non-instanciées dans i
-	D : domaines des variables
-	n, states, nbre_occurences : les contraintes
+	nbreVar : nombre de variables restantes à instancier
+	D : domaine des variables
+	n, states, nbre_occurences : contraintes
 	'''
-	if len(V) == 0:
+	if nbreVar == 0:
 		return i
 	else:
-		xk = V[0]
-		V_temp = V.copy()
-		V_temp.remove(xk)
-		for j in range(len(D[xk])):
+		nbreVar -= 1
+		for j in range(len(D)):
 			nbre_occurences_bis = nbre_occurences.copy()
-			v = D[xk][j]
+			v = D[j]
 			nbre_occurences_bis[j] += 1
-			D_bis = deepcopy(D)
+			D_bis = D.copy()
 			if nbre_occurences_bis[j] == 2:
-				for d in D_bis:
-					if v in d:
-						d.remove(v)
+				D_bis.remove(v)
 			noeud = i + list(v)
 			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
 			if n == len(noeud):
@@ -241,30 +256,26 @@ def RAC_forward_checking_doublons(i,V,D,n,states,nbre_occurences):
 				cd = compatibilite_doublons(n,states,i_dico)
 				if cd: # si le code est compatible, on le prend
 					return i_dico
-			res = RAC_forward_checking_doublons(i+list(v),V_temp,D_bis,n,states,nbre_occurences_bis)
+			res = RAC_forward_checking_doublons(i+list(v),nbreVar,D_bis,n,states,nbre_occurences_bis)
 			if len(res) == n and compatibilite_doublons(n,states,res):
 				i = res
 				break
 	return i
 
-def RAC_forward_checking_ameliore(i,V,D,n,states):
+def RAC_forward_checking_ameliore(i,nbreVar,D,n,states):
 	'''
 	i : instanciation courante
-	V : liste de variables non-instanciées dans i
-	D : domaines des variables
-	n, states : les contraintes
+	nbreVar : nombre de variables restantes à instancier
+	D : domaine des variables
+	n, states : contraintes
 	'''
-	if len(V) == 0:
+	if nbreVar == 0:
 		return i
 	else:
-		xk = V[0]
-		V_temp = V.copy()
-		V_temp.remove(xk)
-		for v in D[xk]:
-			D_bis = deepcopy(D)
-			for d in D_bis:
-				if v in d:
-					d.remove(v)
+		nbreVar -= 1
+		for v in D:
+			D_bis = D.copy()
+			D_bis.remove(v)
 			noeud = i + list(v)
 			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
 			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
@@ -289,11 +300,27 @@ def RAC_forward_checking_ameliore(i,V,D,n,states):
 							break
 					if compatible == False:
 						continue
-				res = RAC_forward_checking_ameliore(i+list(v),V_temp,D_bis,n,states)
+				res = RAC_forward_checking_ameliore(i+list(v),nbreVar,D_bis,n,states)
 				if len(res) == n and compatibilite(n,states,res):
 					i = res
 					break
 	return i
+
+def engendrer_et_tester_bonus(D,n,states):
+	'''
+	D : domaine des variables
+	n, states : contraintes
+	'''
+	while True:
+		res = {}
+		D_temp = D.copy()
+		for i in range(n):
+			temp = random.choice(D_temp)
+			res[i] = temp
+			D_temp.remove(temp) # améliore l'algo en évitant les doublons
+		if compatibilite(n,states,res):
+			break
+	return res
 
 def run():
 	
@@ -304,7 +331,7 @@ def run():
 	print("3: retour arrière chronologique AVEC forward checking SANS doublons")
 	print("4: retour arrière chronologique AVEC forward checking AVEC doublons")
 	print("5: retour arrière chronologique AVEC forward checking SANS doublon, AMELIORE")
-	print("6: Bonus : ")
+	print("6: Bonus : engendrer et tester AMELIORE")
 	print("7: algorithme génétique")
 	print("8: Bonus : ")
 	print("9: je veux jouer moi-même")
@@ -379,17 +406,7 @@ def run():
 		CXPB = 0.6 # probabilité de crossover
 		MUTPB = 0.4	# probabilité de mutation
 
-		D_engendrer_et_tester = mastermind.get_Dp().copy()
-
-		D_RAC = []
-		for i in range(n):
-			temp = mastermind.get_Dp().copy()
-			D_RAC.append(temp)
-		V_RAC = []
-		for i in range(0,n):
-			V_RAC.append(i)
-
-		D_algoGen = mastermind.get_Dp().copy()
+		D = mastermind.get_Dp().copy()
 
 		while(True):
 			'''
@@ -428,55 +445,48 @@ def run():
 			elif (joueur == 1): # engendrer et tester
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
-					D_engendrer_et_tester_temp = D_engendrer_et_tester.copy()
+					D_temp = D.copy()
 					for i in range(n):
-						temp = random.choice(D_engendrer_et_tester_temp)
+						temp = random.choice(D_temp)
 						res[i] = temp
-						D_engendrer_et_tester_temp.remove(temp)
+						D_temp.remove(temp)
 				else:
-					while True:
-						res = {}
-						D_engendrer_et_tester_temp = D_engendrer_et_tester.copy()
-						for i in range(n):
-							temp = random.choice(D_engendrer_et_tester_temp)
-							res[i] = temp
-							D_engendrer_et_tester_temp.remove(temp) # améliore l'algo en évitant les doublons
-						if compatibilite(mastermind.get_n(),mastermind.get_states(),res):
-							break
+					i = []
+					nbreVar = n
+					states = mastermind.get_states()
+					res = engendrer_et_tester(i,nbreVar,D,n,states)
 
 			#################################################################################################################################################################################################
 
 			elif (joueur == 2): # retour arrière chronologique sans forward checking
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
-					D_RAC_temp = D_RAC[0].copy()
+					D_temp = D.copy()
 					for i in range(n):
-						temp = random.choice(D_RAC_temp)
+						temp = random.choice(D_temp)
 						res[i] = temp
-						D_RAC_temp.remove(temp)
+						D_temp.remove(temp)
 				else:
 					i = []
-					V = V_RAC.copy()
-					D = deepcopy(D_RAC)
+					nbreVar = n
 					states = mastermind.get_states()
-					res = RAC(i,V,D,n,states)
+					res = RAC(i,nbreVar,D,n,states)
 
 			#################################################################################################################################################################################################
 
 			elif (joueur == 3): # retour arrière chronologique AVEC forward checking SANS doublons
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
-					D_RAC_temp = D_RAC[0].copy()
+					D_temp = D.copy()
 					for i in range(n):
-						temp = random.choice(D_RAC_temp)
+						temp = random.choice(D_temp)
 						res[i] = temp
-						D_RAC_temp.remove(temp) # évite les doublons
+						D_temp.remove(temp)
 				else:
 					i = []
-					V = V_RAC.copy()
-					D = deepcopy(D_RAC)
+					nbreVar = n
 					states = mastermind.get_states()
-					res = RAC_forward_checking(i,V,D,n,states)
+					res = RAC_forward_checking(i,nbreVar,D,n,states)
 
 			#################################################################################################################################################################################################
 
@@ -484,44 +494,51 @@ def run():
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
 					temp_doublons = {}
-					D_RAC_temp = D_RAC[0].copy()
+					D_temp = D.copy()
 					for i in range(n):
-						temp = random.choice(D_RAC_temp)
+						temp = random.choice(D_temp)
 						res[i] = temp
 						if temp in temp_doublons:
 							temp_doublons[temp] += 1
-							D_RAC_temp.remove(temp) # évite les doublons
+							D_temp.remove(temp) # évite les doublons
 						else:
 							temp_doublons[temp] = 1
 				else:
 					i = []
-					V = V_RAC.copy()
-					D = deepcopy(D_RAC)
+					nbreVar = n
 					states = mastermind.get_states()
 					nbre_occurences = [0] * mastermind.get_p()
-					res = RAC_forward_checking_doublons(i,V,D,n,states,nbre_occurences)
+					res = RAC_forward_checking_doublons(i,nbreVar,D,n,states,nbre_occurences)
 
 			#################################################################################################################################################################################################
 
 			elif (joueur == 5): # retour arrière chronologique AVEC forward checking SANS doublon, AMELIORE
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
-					D_RAC_temp = D_RAC[0].copy()
+					D_temp = D.copy()
 					for i in range(n):
-						temp = random.choice(D_RAC_temp)
+						temp = random.choice(D_temp)
 						res[i] = temp
-						D_RAC_temp.remove(temp) # évite les doublons
+						D_temp.remove(temp) # évite les doublons
 				else:
 					i = []
-					V = V_RAC.copy()
-					D = deepcopy(D_RAC)
+					nbreVar = n
 					states = mastermind.get_states()
-					res = RAC_forward_checking_ameliore(i,V,D,n,states)
+					res = RAC_forward_checking_ameliore(i,nbreVar,D,n,states)
 
 			#################################################################################################################################################################################################
 
 			elif (joueur == 6): # bonus
-				pass
+				res = {}
+				if mastermind.get_nb_tentatives() == 0:
+					D_temp = D.copy()
+					for i in range(n):
+						temp = random.choice(D_temp)
+						res[i] = temp
+						D_temp.remove(temp)
+				else:
+					states = mastermind.get_states()
+					res = engendrer_et_tester_bonus(D,n,states)
 
 			#################################################################################################################################################################################################
 
@@ -531,11 +548,11 @@ def run():
 				res = {}
 				
 				if mastermind.get_nb_tentatives() == 0:
-					D_algoGen_temp = D_algoGen.copy()
+					D_temp = D.copy()
 					for i in range(n):
-						temp = random.choice(D_algoGen_temp)
+						temp = random.choice(D_temp)
 						res[i] = temp
-						D_algoGen_temp.remove(temp)
+						D_temp.remove(temp)
 					historique = {}
 
 				else:
@@ -564,11 +581,11 @@ def run():
 								#print("La population grandit, de taille",p+1)
 								individu = {}
 								if gen == 0:
-									D_algoGen_temp = D_algoGen.copy()
+									D_temp = D.copy()
 									for i in range(n):
-										temp = random.choice(D_algoGen_temp)
+										temp = random.choice(D_temp)
 										individu[i] = temp
-										D_algoGen_temp.remove(temp)
+										D_temp.remove(temp)
 								else:
 									parents_temp = deepcopy(parents)
 									children = []
@@ -597,7 +614,7 @@ def run():
 										if random.random() < MUTPB:
 											child = random.choice(parents_temp)
 											alea = random.randint(0,len(child)-1)
-											child[0][alea] = random.choice(D_algoGen)
+											child[0][alea] = random.choice(D)
 											for i in range(n):
 												individu[i] = child[0][i]
 										else:
@@ -829,7 +846,7 @@ def run():
 			mastermind.create_code_tentative(res) # on incrémente ici le nombre de tentatives
 			
 			#print("Code saisi par le joueur :",mastermind.get_code_tentative())
-			if joueur == 4 or difficulte == 1:
+			if joueur == 4 or joueur == 1 or difficulte == 1:
 				mastermind.comparaison_doublons()
 			else:
 				mastermind.comparaison()
