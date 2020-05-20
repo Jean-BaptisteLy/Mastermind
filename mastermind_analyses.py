@@ -1496,8 +1496,8 @@ def graphe2_3_evolution_nbre_essais(tailles_n,nbre_instances,meilleure_strategie
 # Tests :
 
 
-n = 5
-joueur = 1
+n = 4
+joueur = 5
 strategie_algo_genetique = 0
 maxsize = 10
 maxgen = 105
@@ -1519,8 +1519,11 @@ for i in range(len(premiere_tentative_liste)):
 	premiere_tentative_dico[i] = premiere_tentative_liste[i]
 
 #print("premiere_tentative_dico :",premiere_tentative_dico)
-
-#run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1: '1', 2: '2', 3: '3'},strategie_algo_genetique=0,maxsize=10,maxgen=105,popsize=50,CXPB=0.6,MUTPB=0.4):
+'''
+joueur = 5
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
+'''
 
 print("n =",n)
 print("code_secret sans doublon :",code_secret)
@@ -1544,6 +1547,7 @@ nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,str
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
 
 print("Le fichier s'est chargé sans problème. Prêt à tracer les courbes.")
+
 
 # Tests sur 1000 runs pour essayer toutes les situations
 '''
