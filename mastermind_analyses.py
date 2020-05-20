@@ -1560,7 +1560,7 @@ def graphe2_3_evolution_nbre_essais(tailles_n,nbre_instances,meilleure_strategie
 
 # Tests :
 
-n = 5
+n = 4
 joueur = 5
 strategie_algo_genetique = 0
 maxsize = 10
