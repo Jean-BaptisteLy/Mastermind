@@ -8,3 +8,4 @@ L'énoncé complet du projet est le fichier ``projet20.pdf``, il se repose sur l
 
 Le fichier `mastermind.py` est destiné au jeu. Il est fait pour être joué.
 Le fichier `mastermind_analyses.py` est destiné aux analyses.
+Le fichier `mastermind_analyses_test.py` est destiné aux tests.
