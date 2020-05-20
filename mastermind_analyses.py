@@ -1611,6 +1611,9 @@ print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de no
 joueur = 7
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
+joueur = 8
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives)
 
 print("Le fichier s'est chargé sans problème. Prêt à tracer les courbes.")
 
