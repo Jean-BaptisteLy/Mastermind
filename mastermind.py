@@ -306,7 +306,7 @@ def RAC_forward_checking_ameliore(i,nbreVar,D,n,states):
 					break
 	return i
 
-def engendrer_et_tester_bonus(D,n,states):
+def LasVegas(D,n,states):
 	'''
 	D : domaine des variables
 	n, states : contraintes
@@ -331,7 +331,7 @@ def run():
 	print("3: retour arrière chronologique AVEC forward checking SANS doublons")
 	print("4: retour arrière chronologique AVEC forward checking AVEC doublons")
 	print("5: retour arrière chronologique AVEC forward checking SANS doublon, AMELIORE")
-	print("6: Bonus : engendrer et tester AMELIORE")
+	print("6: Bonus : Las Vegas")
 	print("7: algorithme génétique")
 	print("8: Bonus : ")
 	print("9: je veux jouer moi-même")
@@ -528,7 +528,7 @@ def run():
 
 			#################################################################################################################################################################################################
 
-			elif (joueur == 6): # bonus
+			elif (joueur == 6): # bonus : Las Vegas
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
 					D_temp = D.copy()
@@ -538,7 +538,7 @@ def run():
 						D_temp.remove(temp)
 				else:
 					states = mastermind.get_states()
-					res = engendrer_et_tester_bonus(D,n,states)
+					res = LasVegas(D,n,states)
 
 			#################################################################################################################################################################################################
 

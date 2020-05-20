@@ -336,7 +336,7 @@ def RAC_forward_checking_ameliore(i,nbreVar,D,n,states):
 					break
 	return i,nbre_noeuds
 
-def engendrer_et_tester_bonus(D,n,states):
+def LasVegas(D,n,states):
 	'''
 	D : domaine des variables
 	n : contrainte
@@ -474,13 +474,13 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 			#################################################################################################################################################################################################
 
-			elif (joueur == 6): # bonus
+			elif (joueur == 6): # bonus : Las Vegas
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
 					res = premiere_tentative
 				else:
 					states = mastermind.get_states()
-					res,nbre_noeuds_temp = engendrer_et_tester_bonus(D,n,states)
+					res,nbre_noeuds_temp = LasVegas(D,n,states)
 					nbre_noeuds += nbre_noeuds_temp
 					#print("Nombre de noeuds (en comptant les précédents) :",nbre_noeuds)
 					#input()
