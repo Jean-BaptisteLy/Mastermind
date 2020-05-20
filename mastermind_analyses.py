@@ -354,6 +354,56 @@ def LasVegas(D,n,states):
 			break
 	return res,nbre_noeuds
 
+def RAC_forward_checking_ameliore_LasVegas(i,nbreVar,D,n,states):
+	'''
+	i : instanciation courante
+	V : liste de variables non-instanciées dans i
+	D : domaines des variables
+	n, states : les contraintes
+	'''
+	nbre_noeuds = 0
+	if nbreVar == 0:
+		return i,nbre_noeuds
+	else:
+		nbreVar -= 1
+		D_LasVegas = D.copy()
+		for lv in range(len(D_LasVegas)):
+			v = random.choice(D_LasVegas)
+			D_LasVegas.remove(v)
+			D_bis = D.copy()
+			D_bis.remove(v)
+			noeud = i + list(v)
+			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
+			nbre_noeuds += 1
+			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
+				i_dico = {}
+				for j in range(len(noeud)):
+					i_dico[j] = noeud[j]
+				if n == len(noeud): # code complet			
+					if compatibilite(n,states,i_dico): # si le code est compatible, on le prend
+						return i_dico,nbre_noeuds
+				else:
+					compatible = True
+					mm_temp = Mastermind(n)
+					for t,s in states.items():
+						code_temp = []
+						for j in s[0].values():
+							code_temp.append(j)
+						mm_temp.create_code_secret(code_temp) # liste
+						mm_temp.create_code_tentative(i_dico) # dico
+						mm_temp.comparaison()
+						if mm_temp.get_states()[len(mm_temp.get_states())][1] > s[1] or mm_temp.get_states()[len(mm_temp.get_states())][2] > s[2]:
+							compatible = False
+							break
+					if compatible == False:
+						continue
+				res,nbre_noeuds_temp = RAC_forward_checking_ameliore(i+list(v),nbreVar,D_bis,n,states)
+				nbre_noeuds += nbre_noeuds_temp
+				if len(res) == n and compatibilite(n,states,res):
+					i = res
+					break
+	return i,nbre_noeuds
+
 def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1: '1', 2: '2', 3: '3'},strategie_algo_genetique=0,maxsize=10,maxgen=105,popsize=50,CXPB=0.6,MUTPB=0.4):
 
 	nbre_noeuds = 0
@@ -487,7 +537,22 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 			#################################################################################################################################################################################################
 
-			elif (joueur == 7): # algorithme génétique
+			elif (joueur == 7): # bonus : A5 version Las Vegas
+				res = {}
+				if mastermind.get_nb_tentatives() == 0:
+					res = premiere_tentative
+				else:
+					i = []
+					nbreVar = n
+					states = mastermind.get_states()
+					res,nbre_noeuds_temp = RAC_forward_checking_ameliore_LasVegas(i,nbreVar,D,n,states)
+					nbre_noeuds += nbre_noeuds_temp
+					#print("Nombre de noeuds (en comptant les précédents) :",nbre_noeuds)
+					#input()
+
+			#################################################################################################################################################################################################
+
+			elif (joueur == 8): # algorithme génétique
 
 				E = [] # ensemble de codes compatibles
 				res = {}
@@ -1312,25 +1377,25 @@ def graphe2_2_evolution_temps(tailles_n,nbre_instances,maxsize,maxgen,popsize,cx
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			temps_AG0 += time.time() - start_time
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=1,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=1,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			temps_AG1 += time.time() - start_time
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=2,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=2,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			temps_AG2 += time.time() - start_time
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=3,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=3,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			temps_AG3 += time.time() - start_time
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=4,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=4,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			temps_AG4 += time.time() - start_time
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=5,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=5,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			temps_AG5 += time.time() - start_time
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=6,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=6,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			temps_AG6 += time.time() - start_time
 		yAG0.append(temps_AG0/nbre_instances)
 		yAG1.append(temps_AG1/nbre_instances)
@@ -1382,13 +1447,13 @@ def graphe2_2_evolution_nbre_essais(tailles_n,nbre_instances,maxsize,maxgen,pops
 			premiere_tentative = {}
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
-			nb_tentativesAG0,nb_noeudsAG0 = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG1,nb_noeudsAG1 = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=1,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG2,nb_noeudsAG2 = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=2,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG3,nb_noeudsAG3 = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=3,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG4,nb_noeudsAG4 = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=4,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG5,nb_noeudsAG5 = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=5,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG6,nb_noeudsAG6 = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=6,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			nb_tentativesAG0,nb_noeudsAG0 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			nb_tentativesAG1,nb_noeudsAG1 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=1,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			nb_tentativesAG2,nb_noeudsAG2 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=2,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			nb_tentativesAG3,nb_noeudsAG3 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=3,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			nb_tentativesAG4,nb_noeudsAG4 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=4,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			nb_tentativesAG5,nb_noeudsAG5 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=5,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			nb_tentativesAG6,nb_noeudsAG6 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=6,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
 			nb_tentatives_AG0 += nb_tentativesAG0
 			nb_tentatives_AG1 += nb_tentativesAG1
 			nb_tentatives_AG2 += nb_tentativesAG2
@@ -1442,7 +1507,7 @@ def graphe2_3_evolution_temps(tailles_n,nbre_instances,meilleure_strategie_parti
 			run(n,meilleure_strategie_partie_1,code_secret,premiere_tentative)
 			temps_A += time.time() - start_time
 			start_time = time.time()
-			run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
 			temps_AG += time.time() - start_time
 		yA.append(temps_A/nbre_instances)
 		yAG.append(temps_AG/nbre_instances)
@@ -1474,7 +1539,7 @@ def graphe2_3_evolution_nbre_essais(tailles_n,nbre_instances,meilleure_strategie
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
 			nb_tentativesA,nb_noeudsA = run(n,meilleure_strategie_partie_1,code_secret,premiere_tentative)
-			nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=7,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+			nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
 			nb_tentatives_A += nb_tentativesA
 			nb_tentatives_AG += nb_tentativesAG
 		yA.append(nb_tentatives_A/nbre_instances)
@@ -1495,8 +1560,7 @@ def graphe2_3_evolution_nbre_essais(tailles_n,nbre_instances,meilleure_strategie
 
 # Tests :
 
-
-n = 4
+n = 5
 joueur = 5
 strategie_algo_genetique = 0
 maxsize = 10
@@ -1520,13 +1584,12 @@ for i in range(len(premiere_tentative_liste)):
 
 #print("premiere_tentative_dico :",premiere_tentative_dico)
 '''
-joueur = 5
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
 '''
 
 print("n =",n)
-print("code_secret sans doublon :",code_secret)
+#print("code_secret sans doublon :",code_secret)
 joueur = 1
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
@@ -1543,6 +1606,9 @@ joueur = 5
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
 joueur = 6
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
+joueur = 7
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
 

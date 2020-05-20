@@ -306,6 +306,53 @@ def RAC_forward_checking_ameliore(i,nbreVar,D,n,states):
 					break
 	return i
 
+def RAC_forward_checking_ameliore_LasVegas(i,nbreVar,D,n,states):
+	'''
+	i : instanciation courante
+	nbreVar : nombre de variables restantes à instancier
+	D : domaine des variables
+	n, states : contraintes
+	'''
+	if nbreVar == 0:
+		return i
+	else:
+		nbreVar -= 1
+		D_LasVegas = D.copy()
+		for lv in range(len(D_LasVegas)):
+			v = random.choice(D_LasVegas)
+			D_LasVegas.remove(v)
+			D_bis = D.copy()
+			D_bis.remove(v)
+			noeud = i + list(v)
+			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
+			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
+				i_dico = {}
+				for j in range(len(noeud)):
+					i_dico[j] = noeud[j]
+				if n == len(noeud): # code complet			
+					if compatibilite(n,states,i_dico): # si le code est compatible, on le prend
+						return i_dico
+				else:
+					compatible = True
+					mm_temp = Mastermind(n)
+					for t,s in states.items():
+						code_temp = []
+						for j in s[0].values():
+							code_temp.append(j)
+						mm_temp.create_code_secret(code_temp) # liste
+						mm_temp.create_code_tentative(i_dico) # dico
+						mm_temp.comparaison()
+						if mm_temp.get_states()[len(mm_temp.get_states())][1] > s[1] or mm_temp.get_states()[len(mm_temp.get_states())][2] > s[2]:
+							compatible = False
+							break
+					if compatible == False:
+						continue
+				res = RAC_forward_checking_ameliore(i+list(v),nbreVar,D_bis,n,states)
+				if len(res) == n and compatibilite(n,states,res):
+					i = res
+					break
+	return i
+
 def LasVegas(D,n,states):
 	'''
 	D : domaine des variables
@@ -331,13 +378,13 @@ def run():
 	print("3: retour arrière chronologique AVEC forward checking SANS doublons")
 	print("4: retour arrière chronologique AVEC forward checking AVEC doublons")
 	print("5: retour arrière chronologique AVEC forward checking SANS doublon, AMELIORE")
-	print("6: Bonus : Las Vegas")
-	print("7: algorithme génétique")
-	print("8: Bonus : ")
+	print("6: Bonus : Las Vegas normal")
+	print("7: Bonus : A5 version Las Vegas")
+	print("8: algorithme génétique")
 	print("9: je veux jouer moi-même")
 	joueur = int(input())
 
-	if joueur == 7:		
+	if joueur == 8:		
 		print("Veuillez choisir la stratégie de l'algorithme génétique :")
 		print("0: random")
 		print("1: Bonus : Meilleure fitness")
@@ -542,7 +589,23 @@ def run():
 
 			#################################################################################################################################################################################################
 
-			elif (joueur == 7): # algorithme génétique
+			elif (joueur == 7): # bonus : A5 version Las Vegas
+				res = {}
+				if mastermind.get_nb_tentatives() == 0:
+					D_temp = D.copy()
+					for i in range(n):
+						temp = random.choice(D_temp)
+						res[i] = temp
+						D_temp.remove(temp)
+				else:
+					i = []
+					nbreVar = n
+					states = mastermind.get_states()
+					res = RAC_forward_checking_ameliore_LasVegas(i,nbreVar,D,n,states)
+
+			#################################################################################################################################################################################################
+
+			elif (joueur == 8): # algorithme génétique
 
 				E = [] # ensemble de codes compatibles
 				res = {}
