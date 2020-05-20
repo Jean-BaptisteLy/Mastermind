@@ -2,8 +2,8 @@ import random
 import copy
 import time
 from copy import deepcopy
-import numpy as np
-import matplotlib.pyplot as plt
+#import numpy as np
+#import matplotlib.pyplot as plt
 
 class Mastermind:
 
@@ -1561,7 +1561,6 @@ def graphe2_3_evolution_nbre_essais(tailles_n,nbre_instances,meilleure_strategie
 
 # Tests :
 
-'''
 n = 4
 joueur = 5
 strategie_algo_genetique = 0
@@ -1586,13 +1585,11 @@ for i in range(len(premiere_tentative_liste)):
 
 #print("premiere_tentative_dico :",premiere_tentative_dico)
 '''
-
-'''
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
 '''
 
-'''
+
 print("n =",n)
 #print("code_secret sans doublon :",code_secret)
 joueur = 1
@@ -1629,7 +1626,7 @@ nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,str
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
 
 print("Le fichier s'est chargé sans problème. Prêt à tracer les courbes.")
-'''
+
 
 # Tests sur 1000 runs pour essayer toutes les situations
 '''
