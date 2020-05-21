@@ -893,94 +893,25 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 #################################################################################################################################################################################################
 #################################################################################################################################################################################################
 
-def graphe1_1_evolution_temps(tailles_n,nbre_instances):
+def graphe1_1(tailles_n,nbre_instances):
 	x = []
-	yA1 = []
-	yA2 = []
-	yA3 = []
+	yA1_temps = []
+	yA2_temps = []
+	yA3_temps = []
+	yA1_nb_tentatives = []
+	yA2_nb_tentatives = []
+	yA3_nb_tentatives = []
+	yA1_nb_noeuds = []
+	yA2_nb_noeuds = []
+	yA3_nb_noeuds = []
 	for n in tailles_n:
 		x.append(n)
 		temps_A1 = 0
 		temps_A2 = 0
 		temps_A3 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			start_time = time.time()
-			run(n,1,code_secret,premiere_tentative)
-			temps_A1 += time.time() - start_time
-			start_time = time.time()
-			run(n,2,code_secret,premiere_tentative)
-			temps_A2 += time.time() - start_time
-			start_time = time.time()
-			run(n,3,code_secret,premiere_tentative)
-			temps_A3 += time.time() - start_time
-		yA1.append(temps_A1/nbre_instances)
-		yA2.append(temps_A2/nbre_instances)
-		yA3.append(temps_A3/nbre_instances)
-	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Temps moyen en secondes")
-	plt.plot(x, yA1, c="green", label="A1")
-	plt.plot(x, yA2, c="blue", label="A2")
-	plt.plot(x, yA3, c="red", label="A3")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe1_1_evolution_nbre_essais(tailles_n,nbre_instances):
-	x = []
-	yA1 = []
-	yA2 = []
-	yA3 = []
-	for n in tailles_n:
-		x.append(n)
 		nb_tentatives_A1 = 0
 		nb_tentatives_A2 = 0
 		nb_tentatives_A3 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			nb_tentativesA1,nb_noeudsA1 = run(n,1,code_secret,premiere_tentative)
-			nb_tentativesA2,nb_noeudsA2 = run(n,2,code_secret,premiere_tentative) 
-			nb_tentativesA3,nb_noeudsA3 = run(n,3,code_secret,premiere_tentative)
-			nb_tentatives_A1 += nb_tentativesA1
-			nb_tentatives_A2 += nb_tentativesA2
-			nb_tentatives_A3 += nb_tentativesA3
-		yA1.append(nb_tentatives_A1/nbre_instances)
-		yA2.append(nb_tentatives_A2/nbre_instances)
-		yA3.append(nb_tentatives_A3/nbre_instances)
-	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Nombre moyen d’essais")
-	plt.plot(x, yA1, c="green", label="A1")
-	plt.plot(x, yA2, c="blue", label="A2")
-	plt.plot(x, yA3, c="red", label="A3")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe1_1_evolution_nbre_noeuds(tailles_n,nbre_instances):
-	x = []
-	yA1 = []
-	yA2 = []
-	yA3 = []
-	for n in tailles_n:
-		x.append(n)
 		nb_noeuds_A1 = 0
 		nb_noeuds_A2 = 0
 		nb_noeuds_A3 = 0
@@ -994,116 +925,80 @@ def graphe1_1_evolution_nbre_noeuds(tailles_n,nbre_instances):
 			premiere_tentative = {}
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
+			start_time = time.time()
 			nb_tentativesA1,nb_noeudsA1 = run(n,1,code_secret,premiere_tentative)
+			temps_A1 += time.time() - start_time
+			start_time = time.time()
 			nb_tentativesA2,nb_noeudsA2 = run(n,2,code_secret,premiere_tentative) 
+			temps_A2 += time.time() - start_time
+			start_time = time.time()
 			nb_tentativesA3,nb_noeudsA3 = run(n,3,code_secret,premiere_tentative)
+			temps_A3 += time.time() - start_time
+			nb_tentatives_A1 += nb_tentativesA1
+			nb_tentatives_A2 += nb_tentativesA2
+			nb_tentatives_A3 += nb_tentativesA3
 			nb_noeuds_A1 += nb_noeudsA1
 			nb_noeuds_A2 += nb_noeudsA2
 			nb_noeuds_A3 += nb_noeudsA3
-		yA1.append(nb_noeuds_A1/nbre_instances)
-		yA2.append(nb_noeuds_A2/nbre_instances)
-		yA3.append(nb_noeuds_A3/nbre_instances)
+		yA1_temps.append(temps_A1/nbre_instances)
+		yA2_temps.append(temps_A2/nbre_instances)
+		yA3_temps.append(temps_A3/nbre_instances)
+		yA1_nb_tentatives.append(nb_tentatives_A1/nbre_instances)
+		yA2_nb_tentatives.append(nb_tentatives_A2/nbre_instances)
+		yA3_nb_tentatives.append(nb_tentatives_A3/nbre_instances)
+		yA1_nb_noeuds.append(nb_noeuds_A1/nbre_instances)
+		yA2_nb_noeuds.append(nb_noeuds_A2/nbre_instances)
+		yA3_nb_noeuds.append(nb_noeuds_A3/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+	plt.plot(x, yA1_temps, c="green", label="A1")
+	plt.plot(x, yA2_temps, c="blue", label="A2")
+	plt.plot(x, yA3_temps, c="red", label="A3")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_1_temps.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen d’essais")
+	plt.plot(x, yA1_nb_tentatives, c="green", label="A1")
+	plt.plot(x, yA2_nb_tentatives, c="blue", label="A2")
+	plt.plot(x, yA3_nb_tentatives, c="red", label="A3")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_1_nb_tentatives.png")
+	plt.show()
+
 	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen de noeuds")
-	plt.plot(x, yA1, c="green", label="A1")
-	plt.plot(x, yA2, c="blue", label="A2")
-	plt.plot(x, yA3, c="red", label="A3")
+	plt.plot(x, yA1_nb_noeuds, c="green", label="A1")
+	plt.plot(x, yA2_nb_noeuds, c="blue", label="A2")
+	plt.plot(x, yA3_nb_noeuds, c="red", label="A3")
 	plt.legend()
 	plt.grid()
+	plt.savefig("1_1_nb_noeuds.png")
 	plt.show()
 
 #################################################################################################################################################################################################
 
-def graphe1_2_evolution_temps(tailles_n,nbre_instances):
+def graphe1_2(tailles_n,nbre_instances):
 	x = []
-	yA3 = []
-	yA4 = []
+	yA3_temps = []
+	yA4_temps = []
+	yA3_nb_tentatives = []
+	yA4_nb_tentatives = []
+	yA3_nb_noeuds = []
+	yA4_nb_noeuds = []
 	for n in tailles_n:
 		x.append(n)
 		temps_A3 = 0
 		temps_A4 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-
-			start_time = time.time()
-			run(n,3,code_secret,premiere_tentative)
-			temps_A3 += time.time() - start_time
-
-			start_time = time.time()
-			run(n,4,code_secret,premiere_tentative)
-			temps_A4 += time.time() - start_time
-
-		yA3.append(temps_A3/nbre_instances)
-		yA4.append(temps_A4/nbre_instances)
-	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Temps moyen en secondes")
-	'''
-	plt.plot(x, yA3, c="green", label="A3")
-	plt.plot(x, yA4, c="red", label="A4")
-	'''
-	plt.scatter(x, yA3, c="green", label="A3")
-	plt.scatter(x, yA4, c="red", label="A4")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe1_2_evolution_nbre_essais(tailles_n,nbre_instances):
-	x = []
-	yA3 = []
-	yA4 = []
-	for n in tailles_n:
-		x.append(n)
 		nb_tentatives_A3 = 0
 		nb_tentatives_A4 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-
-			nb_tentativesA3,nb_noeudsA3 = run(n,3,code_secret,premiere_tentative)
-			nb_tentativesA4,nb_noeudsA4 = run(n,4,code_secret,premiere_tentative)
-
-			nb_tentatives_A3 += nb_tentativesA3
-			nb_tentatives_A4 += nb_tentativesA4
-		yA3.append(nb_tentatives_A3/nbre_instances)
-		yA4.append(nb_tentatives_A4/nbre_instances)
-	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Nombre moyen d’essais")
-	'''
-	plt.plot(x, yA3, c="green", label="A3")
-	plt.plot(x, yA4, c="red", label="A4")
-	'''
-	plt.scatter(x, yA3, c="green", label="A3")
-	plt.scatter(x, yA4, c="red", label="A4")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe1_2_evolution_nbre_noeuds(tailles_n,nbre_instances):
-	x = []
-	yA3 = []
-	yA4 = []
-	for n in tailles_n:
-		x.append(n)
 		nb_noeuds_A3 = 0
 		nb_noeuds_A4 = 0
 		for i in range(nbre_instances):
@@ -1117,208 +1012,153 @@ def graphe1_2_evolution_nbre_noeuds(tailles_n,nbre_instances):
 			premiere_tentative = {}
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
-
+			start_time = time.time()
 			nb_tentativesA3,nb_noeudsA3 = run(n,3,code_secret,premiere_tentative)
-			nb_tentativesA4,nb_noeudsA4 = run(n,4,code_secret,premiere_tentative) 
-
+			temps_A3 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesA4,nb_noeudsA4 = run(n,4,code_secret,premiere_tentative)
+			temps_A4 += time.time() - start_time
+			nb_tentatives_A3 += nb_tentativesA3
+			nb_tentatives_A4 += nb_tentativesA4
 			nb_noeuds_A3 += nb_noeudsA3
 			nb_noeuds_A4 += nb_noeudsA4
-		yA3.append(nb_noeuds_A3/nbre_instances)
-		yA4.append(nb_noeuds_A4/nbre_instances)
+		yA3_temps.append(temps_A3/nbre_instances)
+		yA4_temps.append(temps_A4/nbre_instances)
+		yA3_nb_tentatives.append(nb_tentatives_A3/nbre_instances)
+		yA4_nb_tentatives.append(nb_tentatives_A4/nbre_instances)
+		yA3_nb_noeuds.append(nb_noeuds_A3/nbre_instances)
+		yA4_nb_noeuds.append(nb_noeuds_A4/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+
+	plt.plot(x, yA3_temps, c="green", label="A3")
+	plt.plot(x, yA4_temps, c="red", label="A4")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_2_temps.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen d’essais")
+	plt.plot(x, yA3_nb_tentatives, c="green", label="A3")
+	plt.plot(x, yA4_nb_tentatives, c="red", label="A4")
+	plt.grid()
+	plt.savefig("1_2_nb_tentatives.png")
+	plt.show()
+
 	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen de noeuds")
-	'''
-	plt.plot(x, yA3, c="green", label="A3")
-	plt.plot(x, yA4, c="red", label="A4")
-	'''
-	plt.scatter(x, yA3, c="green", label="A3")
-	plt.scatter(x, yA4, c="red", label="A4")
+	plt.plot(x, yA3_nb_noeuds, c="green", label="A3")
+	plt.plot(x, yA4_nb_noeuds, c="red", label="A4")
 	plt.legend()
 	plt.grid()
+	plt.savefig("1_2_nb_noeuds.png")
 	plt.show()
 
 #################################################################################################################################################################################################
 
-def graphe1_3_evolution_temps(tailles_n,nbre_instances):
+def graphe1_3(tailles_n,nbre_instances):
 	x = []
-	yA3 = []
-	yA5 = []
+	yA3_temps = []
+	yA5_temps = []
+	yA3_nb_tentatives = []
+	yA5_nb_tentatives = []
+	yA3_nb_noeuds = []
+	yA5_nb_noeuds = []
 	for n in tailles_n:
 		x.append(n)
 		temps_A3 = 0
 		temps_A5 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			start_time = time.time()
-			run(n,3,code_secret,premiere_tentative)
-			temps_A3 += time.time() - start_time
-			start_time = time.time()
-			run(n,5,code_secret,premiere_tentative)
-			temps_A5 += time.time() - start_time
-		yA3.append(temps_A3/nbre_instances)
-		yA5.append(temps_A5/nbre_instances)
-	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Temps moyen en secondes")
-	plt.plot(x, yA3, c="green", label="A3")
-	plt.plot(x, yA5, c="red", label="A5")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe1_3_evolution_nbre_essais(tailles_n,nbre_instances):
-	x = []
-	yA3 = []
-	yA5 = []
-	for n in tailles_n:
-		x.append(n)
 		nb_tentatives_A3 = 0
 		nb_tentatives_A5 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			nb_tentativesA3,nb_noeudsA3 = run(n,3,code_secret,premiere_tentative)
-			nb_tentativesA5,nb_noeudsA5 = run(n,5,code_secret,premiere_tentative) 
-			nb_tentatives_A3 += nb_tentativesA3
-			nb_tentatives_A5 += nb_tentativesA5
-		yA3.append(nb_tentatives_A3/nbre_instances)
-		yA5.append(nb_tentatives_A5/nbre_instances)
-	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Nombre moyen d’essais")
-	plt.plot(x, yA3, c="green", label="A3")
-	plt.plot(x, yA5, c="red", label="A5")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe1_3_evolution_nbre_noeuds(tailles_n,nbre_instances):
-	x = []
-	yA3 = []
-	yA5 = []
-	for n in tailles_n:
-		x.append(n)
 		nb_noeuds_A3 = 0
 		nb_noeuds_A5 = 0
 		for i in range(nbre_instances):
 			mm_temp = Mastermind(n)
 			mm_temp.create_code_secret_random()
 			code_secret = mm_temp.get_code_secret()
+
 			mm_temp0 = Mastermind(n)
 			mm_temp0.create_code_secret_random()
 			premiere_tentative_liste = mm_temp0.get_code_secret()
 			premiere_tentative = {}
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
+			start_time = time.time()
 			nb_tentativesA3,nb_noeudsA3 = run(n,3,code_secret,premiere_tentative)
-			nb_tentativesA5,nb_noeudsA5 = run(n,5,code_secret,premiere_tentative) 
+			temps_A3 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesA5,nb_noeudsA5 = run(n,5,code_secret,premiere_tentative)
+			temps_A5 += time.time() - start_time
+			nb_tentatives_A3 += nb_tentativesA3
+			nb_tentatives_A5 += nb_tentativesA5
 			nb_noeuds_A3 += nb_noeudsA3
 			nb_noeuds_A5 += nb_noeudsA5
-		yA3.append(nb_noeuds_A3/nbre_instances)
-		yA5.append(nb_noeuds_A5/nbre_instances)
-	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Nombre moyen de noeuds")
-	plt.plot(x, yA3, c="green", label="A3")
-	plt.plot(x, yA5, c="red", label="A5")
-	plt.legend()
-	plt.grid()
-	plt.show()
+		yA3_temps.append(temps_A3/nbre_instances)
+		yA5_temps.append(temps_A5/nbre_instances)
+		yA3_nb_tentatives.append(nb_tentatives_A3/nbre_instances)
+		yA5_nb_tentatives.append(nb_tentatives_A5/nbre_instances)
+		yA3_nb_noeuds.append(nb_noeuds_A3/nbre_instances)
+		yA5_nb_noeuds.append(nb_noeuds_A5/nbre_instances)
 
-#################################################################################################################################################################################################
-
-def graphe1_4_evolution_temps(tailles_n,nbre_instances):
-	x = []
-	yA1 = []
-	yA5 = []
-	for n in tailles_n:
-		x.append(n)
-		temps_A1 = 0
-		temps_A5 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			start_time = time.time()
-			run(n,1,code_secret,premiere_tentative)
-			temps_A1 += time.time() - start_time
-			start_time = time.time()
-			run(n,5,code_secret,premiere_tentative)
-			temps_A5 += time.time() - start_time
-		yA1.append(temps_A1/nbre_instances)
-		yA5.append(temps_A5/nbre_instances)
 	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Temps moyen en secondes")
-	plt.plot(x, yA1, c="green", label="A1")
-	plt.plot(x, yA5, c="red", label="A5")
+	plt.plot(x, yA3_temps, c="green", label="A3")
+	plt.plot(x, yA5_temps, c="red", label="A5")
 	plt.legend()
 	plt.grid()
+	plt.savefig("1_3_temps.png")
 	plt.show()
 
-def graphe1_4_evolution_nbre_essais(tailles_n,nbre_instances):
-	x = []
-	yA1 = []
-	yA5 = []
-	for n in tailles_n:
-		x.append(n)
-		nb_tentatives_A1 = 0
-		nb_tentatives_A5 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			nb_tentativesA1,nb_noeudsA1 = run(n,1,code_secret,premiere_tentative)
-			nb_tentativesA5,nb_noeudsA5 = run(n,5,code_secret,premiere_tentative) 
-			nb_tentatives_A1 += nb_tentativesA1
-			nb_tentatives_A5 += nb_tentativesA5
-		yA1.append(nb_tentatives_A1/nbre_instances)
-		yA5.append(nb_tentatives_A5/nbre_instances)
 	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen d’essais")
-	plt.plot(x, yA1, c="green", label="A1")
-	plt.plot(x, yA5, c="red", label="A5")
+	plt.plot(x, yA3_nb_tentatives, c="green", label="A3")
+	plt.plot(x, yA5_nb_tentatives, c="red", label="A5")
 	plt.legend()
 	plt.grid()
+	plt.savefig("1_3_nb_tentatives.png")
 	plt.show()
 
-def graphe1_4_evolution_nbre_noeuds(tailles_n,nbre_instances):
+	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen de noeuds")
+	plt.plot(x, yA3_nb_noeuds, c="green", label="A3")
+	plt.plot(x, yA5_nb_noeuds, c="red", label="A5")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_3_nb_noeuds.png")
+	plt.show()
+
+#################################################################################################################################################################################################
+
+def graphe1_4(tailles_n,nbre_instances):
 	x = []
-	yA1 = []
-	yA5 = []
+	yA5_temps = []
+	yA6_temps = []
+	yA7_temps = []
+	yA5_nb_tentatives = []
+	yA6_nb_tentatives = []
+	yA7_nb_tentatives = []
+	yA5_nb_noeuds = []
+	yA6_nb_noeuds = []
+	yA7_nb_noeuds = []
 	for n in tailles_n:
 		x.append(n)
-		nb_noeuds_A1 = 0
+		temps_A5 = 0
+		temps_A6 = 0
+		temps_A7 = 0
+		nb_tentatives_A5 = 0
+		nb_tentatives_A6 = 0
+		nb_tentatives_A7 = 0
 		nb_noeuds_A5 = 0
+		nb_noeuds_A6 = 0
+		nb_noeuds_A7 = 0
 		for i in range(nbre_instances):
 			mm_temp = Mastermind(n)
 			mm_temp.create_code_secret_random()
@@ -1329,19 +1169,62 @@ def graphe1_4_evolution_nbre_noeuds(tailles_n,nbre_instances):
 			premiere_tentative = {}
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
-			nb_tentativesA1,nb_noeudsA1 = run(n,1,code_secret,premiere_tentative)
-			nb_tentativesA5,nb_noeudsA5 = run(n,5,code_secret,premiere_tentative) 
-			nb_noeuds_A1 += nb_noeudsA1
+			start_time = time.time()
+			nb_tentativesA5,nb_noeudsA5 = run(n,5,code_secret,premiere_tentative)
+			temps_A5 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesA6,nb_noeudsA6 = run(n,6,code_secret,premiere_tentative) 
+			temps_A6 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesA7,nb_noeudsA7 = run(n,7,code_secret,premiere_tentative)
+			temps_A7 += time.time() - start_time
+			nb_tentatives_A5 += nb_tentativesA5
+			nb_tentatives_A6 += nb_tentativesA6
+			nb_tentatives_A7 += nb_tentativesA7
 			nb_noeuds_A5 += nb_noeudsA5
-		yA1.append(nb_noeuds_A1/nbre_instances)
-		yA5.append(nb_noeuds_A5/nbre_instances)
+			nb_noeuds_A6 += nb_noeudsA6
+			nb_noeuds_A7 += nb_noeudsA7
+		yA5_temps.append(temps_A5/nbre_instances)
+		yA6_temps.append(temps_A6/nbre_instances)
+		yA7_temps.append(temps_A7/nbre_instances)
+		yA5_nb_tentatives.append(nb_tentatives_A5/nbre_instances)
+		yA6_nb_tentatives.append(nb_tentatives_A6/nbre_instances)
+		yA7_nb_tentatives.append(nb_tentatives_A7/nbre_instances)
+		yA5_nb_noeuds.append(nb_noeuds_A5/nbre_instances)
+		yA6_nb_noeuds.append(nb_noeuds_A6/nbre_instances)
+		yA7_nb_noeuds.append(nb_noeuds_A7/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+	plt.plot(x, yA5_temps, c="green", label="A5")
+	plt.plot(x, yA6_temps, c="blue", label="A6")
+	plt.plot(x, yA7_temps, c="red", label="A7")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_4_temps.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen d’essais")
+	plt.plot(x, yA5_nb_tentatives, c="green", label="A5")
+	plt.plot(x, yA6_nb_tentatives, c="blue", label="A6")
+	plt.plot(x, yA7_nb_tentatives, c="red", label="A7")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_4_nb_tentatives.png")
+	plt.show()
+
 	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen de noeuds")
-	plt.plot(x, yA1, c="green", label="A1")
-	plt.plot(x, yA5, c="red", label="A5")
+	plt.plot(x, yA5_nb_noeuds, c="green", label="A5")
+	plt.plot(x, yA6_nb_noeuds, c="blue", label="A6")
+	plt.plot(x, yA7_nb_noeuds, c="red", label="A7")
 	plt.legend()
 	plt.grid()
+	plt.savefig("1_4_nb_noeuds.png")
 	plt.show()
 
 #################################################################################################################################################################################################
@@ -1349,15 +1232,22 @@ def graphe1_4_evolution_nbre_noeuds(tailles_n,nbre_instances):
 #################################################################################################################################################################################################
 #################################################################################################################################################################################################
 
-def graphe2_2_evolution_temps(tailles_n,nbre_instances,maxsize,maxgen,popsize,cxpb,mutpb):
+def graphe2_2(tailles_n,nbre_instances,maxsize,maxgen,popsize,cxpb,mutpb):
 	x = []
-	yAG0 = [] # random
-	yAG1 = [] # meilleure fitness
-	yAG2 = [] # pire fitness
-	yAG3 = [] # plus de similarités
-	yAG4 = [] # moins de similarités
-	yAG5 = [] # moins de codes compatibles restants
-	yAG6 = [] # plus de codes compatibles restants
+	yAG0_temps = [] # random
+	yAG1_temps = [] # meilleure fitness
+	yAG2_temps = [] # pire fitness
+	yAG3_temps = [] # plus de similarités
+	yAG4_temps = [] # moins de similarités
+	yAG5_temps = [] # moins de codes compatibles restants
+	yAG6_temps = [] # plus de codes compatibles restants
+	yAG0_nb_tentatives = [] # random
+	yAG1_nb_tentatives = [] # meilleure fitness
+	yAG2_nb_tentatives = [] # pire fitness
+	yAG3_nb_tentatives = [] # plus de similarités
+	yAG4_nb_tentatives = [] # moins de similarités
+	yAG5_nb_tentatives = [] # moins de codes compatibles restants
+	yAG6_nb_tentatives = [] # plus de codes compatibles restants
 	for n in tailles_n:
 		x.append(n)
 		temps_AG0 = 0
@@ -1367,70 +1257,6 @@ def graphe2_2_evolution_temps(tailles_n,nbre_instances,maxsize,maxgen,popsize,cx
 		temps_AG4 = 0
 		temps_AG5 = 0
 		temps_AG6 = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			temps_AG0 += time.time() - start_time
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=1,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			temps_AG1 += time.time() - start_time
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=2,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			temps_AG2 += time.time() - start_time
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=3,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			temps_AG3 += time.time() - start_time
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=4,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			temps_AG4 += time.time() - start_time
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=5,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			temps_AG5 += time.time() - start_time
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=6,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			temps_AG6 += time.time() - start_time
-		yAG0.append(temps_AG0/nbre_instances)
-		yAG1.append(temps_AG1/nbre_instances)
-		yAG2.append(temps_AG2/nbre_instances)
-		yAG3.append(temps_AG3/nbre_instances)
-		yAG4.append(temps_AG4/nbre_instances)
-		yAG5.append(temps_AG5/nbre_instances)
-		yAG6.append(temps_AG6/nbre_instances)
-
-	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Temps moyen en secondes")
-	plt.plot(x, yAG0, label="AG0")
-	plt.plot(x, yAG1, label="AG1")
-	plt.plot(x, yAG2, label="AG2")
-	plt.plot(x, yAG3, label="AG3")
-	plt.plot(x, yAG4, label="AG4")
-	plt.plot(x, yAG5, label="AG5")
-	plt.plot(x, yAG6, label="AG6")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe2_2_evolution_nbre_essais(tailles_n,nbre_instances,maxsize,maxgen,popsize,cxpb,mutpb):
-	x = []
-	yAG0 = [] # random
-	yAG1 = [] # meilleure fitness
-	yAG2 = [] # pire fitness
-	yAG3 = [] # plus de similarités
-	yAG4 = [] # moins de similarités
-	yAG5 = [] # moins de codes compatibles restants
-	yAG6 = [] # plus de codes compatibles restants
-	for n in tailles_n:
-		x.append(n)
 		nb_tentatives_AG0 = 0
 		nb_tentatives_AG1 = 0
 		nb_tentatives_AG2 = 0
@@ -1448,13 +1274,27 @@ def graphe2_2_evolution_nbre_essais(tailles_n,nbre_instances,maxsize,maxgen,pops
 			premiere_tentative = {}
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
-			nb_tentativesAG0,nb_noeudsAG0 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG1,nb_noeudsAG1 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=1,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG2,nb_noeudsAG2 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=2,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG3,nb_noeudsAG3 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=3,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG4,nb_noeudsAG4 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=4,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG5,nb_noeudsAG5 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=5,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
-			nb_tentativesAG6,nb_noeudsAG6 = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=6,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			start_time = time.time()
+			nb_tentativesAG0,nb_noeudsAG0 = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			temps_AG0 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG1,nb_noeudsAG1 = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=1,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			temps_AG1 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG2,nb_noeudsAG2 = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=2,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			temps_AG2 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG3,nb_noeudsAG3 = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=3,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			temps_AG3 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG4,nb_noeudsAG4 = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=4,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			temps_AG4 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG5,nb_noeudsAG5 = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=5,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			temps_AG5 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG6,nb_noeudsAG6 = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=6,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb)
+			temps_AG6 += time.time() - start_time
 			nb_tentatives_AG0 += nb_tentativesAG0
 			nb_tentatives_AG1 += nb_tentativesAG1
 			nb_tentatives_AG2 += nb_tentativesAG2
@@ -1462,71 +1302,63 @@ def graphe2_2_evolution_nbre_essais(tailles_n,nbre_instances,maxsize,maxgen,pops
 			nb_tentatives_AG4 += nb_tentativesAG4
 			nb_tentatives_AG5 += nb_tentativesAG5
 			nb_tentatives_AG6 += nb_tentativesAG6
-		yAG0.append(nb_tentatives_AG0/nbre_instances)
-		yAG1.append(nb_tentatives_AG1/nbre_instances)
-		yAG2.append(nb_tentatives_AG2/nbre_instances)
-		yAG3.append(nb_tentatives_AG3/nbre_instances)
-		yAG4.append(nb_tentatives_AG4/nbre_instances)
-		yAG5.append(nb_tentatives_AG5/nbre_instances)
-		yAG6.append(nb_tentatives_AG6/nbre_instances)
+		yAG0_temps.append(temps_AG0/nbre_instances)
+		yAG1_temps.append(temps_AG1/nbre_instances)
+		yAG2_temps.append(temps_AG2/nbre_instances)
+		yAG3_temps.append(temps_AG3/nbre_instances)
+		yAG4_temps.append(temps_AG4/nbre_instances)
+		yAG5_temps.append(temps_AG5/nbre_instances)
+		yAG6_temps.append(temps_AG6/nbre_instances)
+		yAG0_nb_tentatives.append(nb_tentatives_AG0/nbre_instances)
+		yAG1_nb_tentatives.append(nb_tentatives_AG1/nbre_instances)
+		yAG2_nb_tentatives.append(nb_tentatives_AG2/nbre_instances)
+		yAG3_nb_tentatives.append(nb_tentatives_AG3/nbre_instances)
+		yAG4_nb_tentatives.append(nb_tentatives_AG4/nbre_instances)
+		yAG5_nb_tentatives.append(nb_tentatives_AG5/nbre_instances)
+		yAG6_nb_tentatives.append(nb_tentatives_AG6/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+	plt.plot(x, yAG0_temps, label="AG0")
+	plt.plot(x, yAG1_temps, label="AG1")
+	plt.plot(x, yAG2_temps, label="AG2")
+	plt.plot(x, yAG3_temps, label="AG3")
+	plt.plot(x, yAG4_temps, label="AG4")
+	plt.plot(x, yAG5_temps, label="AG5")
+	plt.plot(x, yAG6_temps, label="AG6")
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_2_temps.png")
+	plt.show()
 
 	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen d’essais")
-	plt.plot(x, yAG0, label="AG0")
-	plt.plot(x, yAG1, label="AG1")
-	plt.plot(x, yAG2, label="AG2")
-	plt.plot(x, yAG3, label="AG3")
-	plt.plot(x, yAG4, label="AG4")
-	plt.plot(x, yAG5, label="AG5")
-	plt.plot(x, yAG6, label="AG6")
+	plt.plot(x, yAG0_nb_tentatives, label="AG0")
+	plt.plot(x, yAG1_nb_tentatives, label="AG1")
+	plt.plot(x, yAG2_nb_tentatives, label="AG2")
+	plt.plot(x, yAG3_nb_tentatives, label="AG3")
+	plt.plot(x, yAG4_nb_tentatives, label="AG4")
+	plt.plot(x, yAG5_nb_tentatives, label="AG5")
+	plt.plot(x, yAG6_nb_tentatives, label="AG6")
 	plt.legend()
 	plt.grid()
+	plt.savefig("2_2_nb_tentatives.png")
 	plt.show()
 
 #################################################################################################################################################################################################
 
-def graphe2_3_evolution_temps(tailles_n,nbre_instances,meilleure_strategie_partie_1,strategie_algo_genetique,maxsize,maxgen,popsize,cxpb,mutpb):
+def graphe2_3(tailles_n,nbre_instances,meilleure_strategie_partie_1,strategie_algo_genetique,maxsize,maxgen,popsize,cxpb,mutpb):
 	x = []
-	yA = []
-	yAG = []
+	yA_temps = []
+	yAG_temps = []
+	yA_nb_tentatives = []
+	yAG_nb_tentatives = []
 	for n in tailles_n:
 		x.append(n)
 		temps_A = 0
 		temps_AG = 0
-		for i in range(nbre_instances):
-			mm_temp = Mastermind(n)
-			mm_temp.create_code_secret_random()
-			code_secret = mm_temp.get_code_secret()
-			mm_temp0 = Mastermind(n)
-			mm_temp0.create_code_secret_random()
-			premiere_tentative_liste = mm_temp0.get_code_secret()
-			premiere_tentative = {}
-			for i in range(len(premiere_tentative_liste)):
-				premiere_tentative[i] = premiere_tentative_liste[i]
-			start_time = time.time()
-			run(n,meilleure_strategie_partie_1,code_secret,premiere_tentative)
-			temps_A += time.time() - start_time
-			start_time = time.time()
-			run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
-			temps_AG += time.time() - start_time
-		yA.append(temps_A/nbre_instances)
-		yAG.append(temps_AG/nbre_instances)
-	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
-	plt.xlabel("Taille n")
-	plt.ylabel("Temps moyen en secondes")
-	plt.plot(x, yA, c="green", label="A")
-	plt.plot(x, yAG, c="red", label="AG")
-	plt.legend()
-	plt.grid()
-	plt.show()
-
-def graphe2_3_evolution_nbre_essais(tailles_n,nbre_instances,meilleure_strategie_partie_1,strategie_algo_genetique,maxsize,maxgen,popsize,cxpb,mutpb):
-	x = []
-	yA = []
-	yAG = []
-	for n in tailles_n:
-		x.append(n)
 		nb_tentatives_A = 0
 		nb_tentatives_AG = 0
 		for i in range(nbre_instances):
@@ -1539,19 +1371,37 @@ def graphe2_3_evolution_nbre_essais(tailles_n,nbre_instances,meilleure_strategie
 			premiere_tentative = {}
 			for i in range(len(premiere_tentative_liste)):
 				premiere_tentative[i] = premiere_tentative_liste[i]
+			start_time = time.time()
 			nb_tentativesA,nb_noeudsA = run(n,meilleure_strategie_partie_1,code_secret,premiere_tentative)
-			nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,reponse=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+			temps_A += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+			temps_AG += time.time() - start_time
 			nb_tentatives_A += nb_tentativesA
 			nb_tentatives_AG += nb_tentativesAG
-		yA.append(nb_tentatives_A/nbre_instances)
-		yAG.append(nb_tentatives_AG/nbre_instances)
+		yA_temps.append(temps_A/nbre_instances)
+		yAG_temps.append(temps_AG/nbre_instances)
+		yA_nb_tentatives.append(nb_tentatives_A/nbre_instances)
+		yAG_nb_tentatives.append(nb_tentatives_AG/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+	plt.plot(x, yA_temps, c="green", label="A")
+	plt.plot(x, yAG_temps, c="red", label="AG")
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_3_temps.png")
+	plt.show()
+
 	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen d’essais")
-	plt.plot(x, yA, c="green", label="A")
-	plt.plot(x, yAG, c="red", label="AG")
+	plt.plot(x, yA_nb_tentatives, c="green", label="A")
+	plt.plot(x, yAG_nb_tentatives, c="red", label="AG")
 	plt.legend()
 	plt.grid()
+	plt.savefig("2_3_nb_tentatives.png")
 	plt.show()
 
 #################################################################################################################################################################################################
