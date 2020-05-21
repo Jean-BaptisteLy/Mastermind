@@ -398,7 +398,7 @@ def RAC_forward_checking_ameliore_LasVegas(i,nbreVar,D,n,states):
 							break
 					if compatible == False:
 						continue
-				res,nbre_noeuds_temp = RAC_forward_checking_ameliore(i+list(v),nbreVar,D_bis,n,states)
+				res,nbre_noeuds_temp = RAC_forward_checking_ameliore_LasVegas(i+list(v),nbreVar,D_bis,n,states)
 				nbre_noeuds += nbre_noeuds_temp
 				if len(res) == n and compatibilite(n,states,res):
 					i = res
