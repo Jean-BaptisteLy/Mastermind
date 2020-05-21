@@ -1594,6 +1594,7 @@ print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de no
 
 '''
 print("n =",n)
+print("premiere tentative :",premiere_tentative_liste)
 #print("code_secret sans doublon :",code_secret)
 joueur = 1
 start_time = time.time()

@@ -1591,7 +1591,8 @@ print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de no
 
 
 print("n =",n)
-#print("code_secret sans doublon :",code_secret)
+print("premiere tentative :",premiere_tentative_liste)
+print("code_secret sans doublon :",code_secret)
 joueur = 1
 start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
