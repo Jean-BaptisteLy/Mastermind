@@ -4,7 +4,7 @@ Satisfaction de contraintes pour le Master Mind
 
 L’objet de ce projet est de développer et tester des méthodes de satisfaction de contraintes et un algorithme génétique pour la résolution d’un problème de master mind.
 
-L'énoncé complet du projet est le fichier `projet20.pdf`.
+L'énoncé complet du projet est dans le fichier `projet20.pdf`.
 
 Les documents contiennent les articles et cours qui ont été utiles à l'élaboration du projet.
 
