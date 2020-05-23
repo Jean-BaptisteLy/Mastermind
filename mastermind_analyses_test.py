@@ -43,7 +43,7 @@ class Mastermind:
 
 	def create_code_tentative(self,tentative):
 		self.nb_tentatives += 1
-		self.code_tentative = deepcopy(tentative)
+		self.code_tentative = tentative.copy()
 
 	def comparaison(self):
 		temp_bp = 0
@@ -237,7 +237,7 @@ def RAC_forward_checking(i,nbreVar,D,n,states):
 			D_bis = D.copy()
 			D_bis.remove(v)
 			noeud = i + list(v)
-			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
+			print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
 			nbre_noeuds += 1
 			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
 				if n == len(noeud):
@@ -305,7 +305,7 @@ def RAC_forward_checking_ameliore(i,nbreVar,D,n,states):
 			D_bis = D.copy()
 			D_bis.remove(v)
 			noeud = i + list(v)
-			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
+			print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
 			nbre_noeuds += 1
 			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
 				i_dico = {}
@@ -429,10 +429,10 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 			
 			print("Tentative courante",mastermind.get_nb_tentatives()+1,":")
 			'''
-			'''
+			
 			if(mastermind.get_nb_tentatives() > 0):
 				print("Tentative",len(mastermind.get_states()),":",mastermind.get_states()[len(mastermind.get_states())][0],"bien placés :",mastermind.get_states()[len(mastermind.get_states())][1],"mal placés :",mastermind.get_states()[len(mastermind.get_states())][2])	
-			'''
+			
 			#################################################################################################################################################################################################
 			
 			if (joueur == 9):
@@ -490,7 +490,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 					res,nbre_noeuds_temp = RAC_forward_checking(i,nbreVar,D,n,states)
 					nbre_noeuds += nbre_noeuds_temp
 					#print("Nombre de noeuds (en comptant les précédents) :",nbre_noeuds)
-					#input()
+					input()
 
 			#################################################################################################################################################################################################
 
@@ -521,7 +521,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 					res,nbre_noeuds_temp = RAC_forward_checking_ameliore(i,nbreVar,D,n,states)
 					nbre_noeuds += nbre_noeuds_temp
 					#print("Nombre de noeuds (en comptant les précédents) :",nbre_noeuds)
-					#input()
+					input()
 
 			#################################################################################################################################################################################################
 
@@ -683,7 +683,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							population_copie = deepcopy(population)
 							for i in range(len(population_copie)):
 								hof_individu,hof_fitness = min(population_copie, key = lambda t: t[1])
-								if hof_fitness > seuil: # ça ne sert à rien de continuer
+								if hof_fitness > seuil or (hof_individu,hof_fitness) in E: # ça ne sert à rien de continuer
 									break
 								uniques_values = []
 								for key, d in hof_individu.items():
@@ -845,10 +845,10 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 				#print("seuil :",seuil)
 				#print("dernière population :",population)
 				if(mastermind.get_nb_tentatives() > 0):
-					print("\nRésumé de toutes les tentatives :")
+					print("\nRésumé de toutes les tentatives du joueur",joueur,":")
 					for i in mastermind.get_states():
 						print("Tentative",i,":",mastermind.get_states()[i][0],"bien placés :",mastermind.get_states()[i][1],"mal placés :",mastermind.get_states()[i][2])
-				print("\nAucun code compatible de trouvé. \n")
+				print("\nTemps limite atteint : aucun code compatible de trouvé. \n")
 				print("Arrêt sans victoire au bout de",mastermind.get_nb_tentatives(),"tentative(s).")
 				print("La bonne réponse était :",reponse,"\n")
 				input()
@@ -865,25 +865,27 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 			mastermind.check_victoire()
 
 			if mastermind.get_victoire():
-				'''
+				
 				if(mastermind.get_nb_tentatives() > 0):
 					print("##############################################################################")
-					print("Résumé de toutes les tentatives :")
+					print("Résumé de toutes les tentatives du joueur",joueur,":")
 					for i in mastermind.get_states():
 						print("Tentative",i,":",mastermind.get_states()[i][0],"bien placés :",mastermind.get_states()[i][1],"mal placés :",mastermind.get_states()[i][2])
 					print("##############################################################################")
 					#input()
-				
+				'''
+				'''
 				print("################################## VICTOIRE ##################################")
 				print("La réponse était bien :",reponse)
 				print("Victoire au bout de",mastermind.get_nb_tentatives(),"tentative(s).")
-				'''
+				
 				break
 			'''
 			if mastermind.get_nb_tentatives() == 10:
 				print("Arrêt sans victoire au bout de",mastermind.get_nb_tentatives(),"tentative(s).")
 				break
 			'''
+			
 	if joueur != 0:
 		return mastermind.get_nb_tentatives(),nbre_noeuds
 
@@ -900,14 +902,21 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 # Tests :
 
-n = 4
+n = 6
 joueur = 5
 strategie_algo_genetique = 0
+'''
+maxsize = 70
+maxgen = 70 #105
+popsize = 70 #50
+CXPB = 0.7 #0.8
+MUTPB = 0.8 #0.8
+'''
 maxsize = 10
-maxgen = 105
-popsize = 50
-CXPB = 0.6
-MUTPB = 0.4
+maxgen = 20
+popsize = 10
+CXPB = 0.8
+MUTPB = 0.8
 
 mm_temp = Mastermind(n)
 mm_temp.create_code_secret_random()
@@ -928,43 +937,66 @@ nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,str
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds)
 '''
 
-
 print("n =",n)
 print("premiere tentative :",premiere_tentative_liste)
 print("code_secret sans doublon :",code_secret)
-joueur = 1
-start_time = time.time()
-nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
-print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-joueur = 2
-start_time = time.time()
-nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
-print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-joueur = 3
-start_time = time.time()
-nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
-print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-joueur = 4
-start_time = time.time()
-nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
-print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
+'''
 joueur = 5
-start_time = time.time()
-nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
-print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-joueur = 6
-start_time = time.time()
-nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
-print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-joueur = 7
-start_time = time.time()
-nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
-print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-joueur = 8
+print("Joueur",joueur,"en cours d'exécution...")
 start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
 
+joueur = 7
+print("Joueur",joueur,"en cours d'exécution...")
+start_time = time.time()
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
+
+joueur = 6
+print("Joueur",joueur,"en cours d'exécution...")
+start_time = time.time()
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
+'''
+joueur = 1
+print("Joueur",joueur,"en cours d'exécution...")
+start_time = time.time()
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
+'''
+joueur = 2
+print("Joueur",joueur,"en cours d'exécution...")
+start_time = time.time()
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
+
+joueur = 8
+print("Joueur",joueur,"en cours d'exécution...")
+start_time = time.time()
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
+'''
+'''
+joueur = 5
+print("Joueur",joueur,"en cours d'exécution...")
+start_time = time.time()
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":")
+print("Nombre de tentatives :",nb_tentatives)
+print("Nombre de noeuds :",nbre_noeuds)
+print("Temps d'exécution :",time.time() - start_time,"secondes.")
+print("")
+joueur = 3
+print("Joueur",joueur,"en cours d'exécution...")
+start_time = time.time()
+nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
+print("Joueur",joueur,":")
+print("Nombre de tentatives :",nb_tentatives)
+print("Nombre de noeuds :",nbre_noeuds)
+print("Temps d'exécution :",time.time() - start_time,"secondes.")
+'''
+print("")
 print("Le fichier s'est chargé sans problème. Prêt à tracer les courbes.")
 
 

@@ -43,7 +43,7 @@ class Mastermind:
 
 	def create_code_tentative(self,tentative):
 		self.nb_tentatives += 1
-		self.code_tentative = deepcopy(tentative)
+		self.code_tentative = tentative.copy()
 
 	def comparaison(self):
 		temp_bp = 0
@@ -683,7 +683,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							population_copie = deepcopy(population)
 							for i in range(len(population_copie)):
 								hof_individu,hof_fitness = min(population_copie, key = lambda t: t[1])
-								if hof_fitness > seuil: # ça ne sert à rien de continuer
+								if hof_fitness > seuil or (hof_individu,hof_fitness) in E: # ça ne sert à rien de continuer
 									break
 								uniques_values = []
 								for key, d in hof_individu.items():
@@ -848,7 +848,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 					print("\nRésumé de toutes les tentatives :")
 					for i in mastermind.get_states():
 						print("Tentative",i,":",mastermind.get_states()[i][0],"bien placés :",mastermind.get_states()[i][1],"mal placés :",mastermind.get_states()[i][2])
-				print("\nAucun code compatible de trouvé. \n")
+				print("\nTemps limite atteint : aucun code compatible de trouvé. \n")
 				print("Arrêt sans victoire au bout de",mastermind.get_nb_tentatives(),"tentative(s).")
 				print("La bonne réponse était :",reponse,"\n")
 				input()
@@ -880,10 +880,11 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 				'''
 				break
 			'''
-			if mastermind.get_nb_tentatives() == 10:
-				print("Arrêt sans victoire au bout de",mastermind.get_nb_tentatives(),"tentative(s).")
+			if mastermind.get_nb_tentatives() == 10: # ATTENTION : à limiter à 10 pour tracer les courbes, sinon temps beaucoup trop long
+				#print("Arrêt sans victoire au bout de",mastermind.get_nb_tentatives(),"tentative(s).")
 				break
 			'''
+			
 	if joueur != 0:
 		return mastermind.get_nb_tentatives(),nbre_noeuds
 
@@ -1033,8 +1034,8 @@ def graphe1_2(tailles_n,nbre_instances):
 	plt.xlabel("Taille n")
 	plt.ylabel("Temps moyen en secondes")
 
-	plt.plot(x, yA3_temps, c="green", label="A3")
-	plt.plot(x, yA4_temps, c="red", label="A4")
+	plt.scatter(x, yA3_temps, c="green", label="A3")
+	plt.scatter(x, yA4_temps, c="red", label="A4")
 	plt.legend()
 	plt.grid()
 	plt.savefig("1_2_temps.png")
@@ -1043,8 +1044,9 @@ def graphe1_2(tailles_n,nbre_instances):
 	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen d’essais")
-	plt.plot(x, yA3_nb_tentatives, c="green", label="A3")
-	plt.plot(x, yA4_nb_tentatives, c="red", label="A4")
+	plt.scatter(x, yA3_nb_tentatives, c="green", label="A3")
+	plt.scatter(x, yA4_nb_tentatives, c="red", label="A4")
+	plt.legend()
 	plt.grid()
 	plt.savefig("1_2_nb_tentatives.png")
 	plt.show()
@@ -1052,11 +1054,99 @@ def graphe1_2(tailles_n,nbre_instances):
 	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
 	plt.xlabel("Taille n")
 	plt.ylabel("Nombre moyen de noeuds")
-	plt.plot(x, yA3_nb_noeuds, c="green", label="A3")
-	plt.plot(x, yA4_nb_noeuds, c="red", label="A4")
+	plt.scatter(x, yA3_nb_noeuds, c="green", label="A3")
+	plt.scatter(x, yA4_nb_noeuds, c="red", label="A4")
 	plt.legend()
 	plt.grid()
 	plt.savefig("1_2_nb_noeuds.png")
+	plt.show()
+
+def graphe1_2_bis(tailles_n,nbre_instances):
+	x = []
+	yA3_temps = []
+	yA4_temps = []
+	yA3_nb_tentatives = []
+	yA4_nb_tentatives = []
+	yA3_nb_noeuds = []
+	yA4_nb_noeuds = []
+	for n in tailles_n:
+		x.append(n)
+		temps_A3 = 0
+		temps_A4 = 0
+		nb_tentatives_A3 = 0
+		nb_tentatives_A4 = 0
+		nb_noeuds_A3 = 0
+		nb_noeuds_A4 = 0
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			code_secret = mm_temp.get_code_secret()
+
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			premiere_tentative_liste = mm_temp0.get_code_secret()
+			premiere_tentative = {}
+			for i in range(len(premiere_tentative_liste)):
+				premiere_tentative[i] = premiere_tentative_liste[i]
+			start_time = time.time()
+			nb_tentativesA3,nb_noeudsA3 = run(n,3,code_secret,premiere_tentative)
+			temps_A3 += time.time() - start_time
+
+			mm_temp2 = Mastermind(n)
+			mm_temp2.create_code_secret_random()
+			code_secret = mm_temp2.get_code_secret()
+
+			mm_temp3 = Mastermind(n)
+			mm_temp3.create_code_secret_random()
+			premiere_tentative_liste = mm_temp3.get_code_secret()
+			premiere_tentative = {}
+			for i in range(len(premiere_tentative_liste)):
+				premiere_tentative[i] = premiere_tentative_liste[i]
+
+			start_time = time.time()
+			nb_tentativesA4,nb_noeudsA4 = run(n,4,code_secret,premiere_tentative)
+			temps_A4 += time.time() - start_time
+
+			nb_tentatives_A3 += nb_tentativesA3
+			nb_tentatives_A4 += nb_tentativesA4
+			nb_noeuds_A3 += nb_noeudsA3
+			nb_noeuds_A4 += nb_noeudsA4
+		yA3_temps.append(temps_A3/nbre_instances)
+		yA4_temps.append(temps_A4/nbre_instances)
+		yA3_nb_tentatives.append(nb_tentatives_A3/nbre_instances)
+		yA4_nb_tentatives.append(nb_tentatives_A4/nbre_instances)
+		yA3_nb_noeuds.append(nb_noeuds_A3/nbre_instances)
+		yA4_nb_noeuds.append(nb_noeuds_A4/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+
+	plt.scatter(x, yA3_temps, c="green", label="A3")
+	plt.scatter(x, yA4_temps, c="red", label="A4")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_2_temps_bis.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen d’essais")
+	plt.scatter(x, yA3_nb_tentatives, c="green", label="A3")
+	plt.scatter(x, yA4_nb_tentatives, c="red", label="A4")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_2_nb_tentatives_bis.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen de noeuds")
+	plt.scatter(x, yA3_nb_noeuds, c="green", label="A3")
+	plt.scatter(x, yA4_nb_noeuds, c="red", label="A4")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_2_nb_noeuds_bis.png")
 	plt.show()
 
 #################################################################################################################################################################################################
@@ -1227,9 +1317,387 @@ def graphe1_4(tailles_n,nbre_instances):
 	plt.savefig("1_4_nb_noeuds.png")
 	plt.show()
 
-#################################################################################################################################################################################################
+def graphe1_4_bis(tailles_n,nbre_instances):
+	x = []
+	yA5_temps = []
+	yA7_temps = []
+	yA5_nb_tentatives = []
+	yA7_nb_tentatives = []
+	yA5_nb_noeuds = []
+	yA7_nb_noeuds = []
+	for n in tailles_n:
+		x.append(n)
+		temps_A5 = 0
+		temps_A7 = 0
+		nb_tentatives_A5 = 0
+		nb_tentatives_A7 = 0
+		nb_noeuds_A5 = 0
+		nb_noeuds_A7 = 0
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			code_secret = mm_temp.get_code_secret()
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			premiere_tentative_liste = mm_temp0.get_code_secret()
+			premiere_tentative = {}
+			for i in range(len(premiere_tentative_liste)):
+				premiere_tentative[i] = premiere_tentative_liste[i]
+			start_time = time.time()
+			nb_tentativesA5,nb_noeudsA5 = run(n,5,code_secret,premiere_tentative)
+			temps_A5 += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesA7,nb_noeudsA7 = run(n,7,code_secret,premiere_tentative)
+			temps_A7 += time.time() - start_time
+			nb_tentatives_A5 += nb_tentativesA5
+			nb_tentatives_A7 += nb_tentativesA7
+			nb_noeuds_A5 += nb_noeudsA5
+			nb_noeuds_A7 += nb_noeudsA7
+		yA5_temps.append(temps_A5/nbre_instances)
+		yA7_temps.append(temps_A7/nbre_instances)
+		yA5_nb_tentatives.append(nb_tentatives_A5/nbre_instances)
+		yA7_nb_tentatives.append(nb_tentatives_A7/nbre_instances)
+		yA5_nb_noeuds.append(nb_noeuds_A5/nbre_instances)
+		yA7_nb_noeuds.append(nb_noeuds_A7/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+	plt.plot(x, yA5_temps, c="green", label="A5")
+	plt.plot(x, yA7_temps, c="red", label="A7")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_4_temps_bis.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen d’essais")
+	plt.plot(x, yA5_nb_tentatives, c="green", label="A5")
+	plt.plot(x, yA7_nb_tentatives, c="red", label="A7")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_4_nb_tentatives_bis.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen de noeuds")
+	plt.plot(x, yA5_nb_noeuds, c="green", label="A5")
+	plt.plot(x, yA7_nb_noeuds, c="red", label="A7")
+	plt.legend()
+	plt.grid()
+	plt.savefig("1_4_nb_noeuds_bis.png")
+	plt.show()
 
 #################################################################################################################################################################################################
+#################################################################################################################################################################################################
+#################################################################################################################################################################################################
+
+def graphe2_1_mutpb(tailles_n,nbre_instances,maxsize,maxgen,popsize,cxpb):
+	liste_mutpb = np.linspace(0.0, 1.0, 11)
+	liste_n_temps = []
+	liste_n_nb_tentatives = []
+	for n in tailles_n:
+		yAG_temps = []
+		yAG_nb_tentatives = []
+		liste_codes_secrets = []
+		liste_premieres_tentatives = []
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			liste_codes_secrets.append(mm_temp.get_code_secret())
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			liste_premieres_tentatives.append(mm_temp0.get_code_secret())
+		for mutpb in liste_mutpb:
+			temps_AG = 0
+			nb_tentatives_AG = 0
+			for i in range(nbre_instances):
+				code_secret = liste_codes_secrets[i]
+				premiere_tentative_liste = liste_premieres_tentatives[i]
+				premiere_tentative = {}
+				for i in range(len(premiere_tentative_liste)):
+					premiere_tentative[i] = premiere_tentative_liste[i]
+				start_time = time.time()
+				nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+				temps_AG += time.time() - start_time
+				nb_tentatives_AG += nb_tentativesAG
+			yAG_temps.append(temps_AG/nbre_instances)
+			yAG_nb_tentatives.append(nb_tentatives_AG/nbre_instances)
+		liste_n_temps.append(yAG_temps)
+		liste_n_nb_tentatives.append(yAG_nb_tentatives)
+
+	titre = "Evolution du temps moyen de résolution en fonction de mutpb avec n = "+str(n)
+	plt.title(titre)
+	plt.xlabel("Probabilité de mutation")
+	plt.ylabel("Temps moyen en secondes")	
+	for i in range(len(liste_n_temps)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_mutpb, liste_n_temps[i], label=titre)
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_temps_mutpb.png")
+	plt.show()
+
+	titre = "Evolution du nombre moyen d’essais nécessaires en fonction de mutpb avec n ="+str(n)
+	plt.title(titre)
+	plt.xlabel("Probabilité de mutation")
+	plt.ylabel("Nombre moyen d’essais")	
+	for i in range(len(liste_n_nb_tentatives)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_mutpb, liste_n_nb_tentatives[i], label=titre)	
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_nb_tentatives_mutpb.png")
+	plt.show()
+
+#################################################################################################################################################################################################
+
+def graphe2_1_cxpb(tailles_n,nbre_instances,maxsize,maxgen,popsize,mutpb):
+	liste_cxpb = np.linspace(0.0, 1.0, 11)
+	liste_n_temps = []
+	liste_n_nb_tentatives = []
+	for n in tailles_n:
+		yAG_temps = []
+		yAG_nb_tentatives = []
+		liste_codes_secrets = []
+		liste_premieres_tentatives = []
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			liste_codes_secrets.append(mm_temp.get_code_secret())
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			liste_premieres_tentatives.append(mm_temp0.get_code_secret())
+		for cxpb in liste_cxpb:
+			temps_AG = 0
+			nb_tentatives_AG = 0
+			for i in range(nbre_instances):
+				code_secret = liste_codes_secrets[i]
+				premiere_tentative_liste = liste_premieres_tentatives[i]
+				premiere_tentative = {}
+				for i in range(len(premiere_tentative_liste)):
+					premiere_tentative[i] = premiere_tentative_liste[i]
+				start_time = time.time()
+				nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+				temps_AG += time.time() - start_time
+				nb_tentatives_AG += nb_tentativesAG
+			yAG_temps.append(temps_AG/nbre_instances)
+			yAG_nb_tentatives.append(nb_tentatives_AG/nbre_instances)
+		liste_n_temps.append(yAG_temps)
+		liste_n_nb_tentatives.append(yAG_nb_tentatives)
+
+	titre = "Evolution du temps moyen de résolution en fonction de cxpb"
+	plt.title(titre)
+	plt.xlabel("Probabilité de crossover")
+	plt.ylabel("Temps moyen en secondes")	
+	for i in range(len(liste_n_temps)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_cxpb, liste_n_temps[i], label=titre)
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_temps_cxpb.png")
+	plt.show()
+
+	titre = "Evolution du nombre moyen d’essais nécessaires en fonction de cxpb"
+	plt.title(titre)
+	plt.xlabel("Probabilité de crossover")
+	plt.ylabel("Nombre moyen d’essais")	
+	for i in range(len(liste_n_nb_tentatives)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_cxpb, liste_n_nb_tentatives[i], label=titre)	
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_nb_tentatives_cxpb.png")
+	plt.show()
+
+#################################################################################################################################################################################################
+
+def graphe2_1_maxsize(tailles_n,nbre_instances,maxgen,popsize,cxpb,mutpb):
+	liste_maxsize = np.linspace(0.0, 100.0, 11)
+	liste_n_temps = []
+	liste_n_nb_tentatives = []
+	for n in tailles_n:
+		yAG_temps = []
+		yAG_nb_tentatives = []
+		liste_codes_secrets = []
+		liste_premieres_tentatives = []
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			liste_codes_secrets.append(mm_temp.get_code_secret())
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			liste_premieres_tentatives.append(mm_temp0.get_code_secret())
+		for maxsize in liste_maxsize:
+			temps_AG = 0
+			nb_tentatives_AG = 0
+			for i in range(nbre_instances):
+				code_secret = liste_codes_secrets[i]
+				premiere_tentative_liste = liste_premieres_tentatives[i]
+				premiere_tentative = {}
+				for i in range(len(premiere_tentative_liste)):
+					premiere_tentative[i] = premiere_tentative_liste[i]
+				start_time = time.time()
+				nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+				temps_AG += time.time() - start_time
+				nb_tentatives_AG += nb_tentativesAG
+			yAG_temps.append(temps_AG/nbre_instances)
+			yAG_nb_tentatives.append(nb_tentatives_AG/nbre_instances)
+		liste_n_temps.append(yAG_temps)
+		liste_n_nb_tentatives.append(yAG_nb_tentatives)
+
+	titre = "Evolution du temps moyen de résolution en fonction de maxsize"
+	plt.title(titre)
+	plt.xlabel("Taille de E")
+	plt.ylabel("Temps moyen en secondes")	
+	for i in range(len(liste_n_temps)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_maxsize, liste_n_temps[i], label=titre)
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_temps_maxsize.png")
+	plt.show()
+
+	titre = "Evolution du nombre moyen d’essais nécessaires en fonction de maxsize"
+	plt.title(titre)
+	plt.xlabel("Taille de E")
+	plt.ylabel("Nombre moyen d’essais")	
+	for i in range(len(liste_n_nb_tentatives)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_maxsize, liste_n_nb_tentatives[i], label=titre)	
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_nb_tentatives_maxsize.png")
+	plt.show()
+
+#################################################################################################################################################################################################
+
+def graphe2_1_popsize(tailles_n,nbre_instances,maxsize,maxgen,cxpb,mutpb):
+	liste_popsize = []
+	for i in range(1,11):
+		liste_popsize.append(i*10)
+	liste_n_temps = []
+	liste_n_nb_tentatives = []
+	for n in tailles_n:
+		yAG_temps = []
+		yAG_nb_tentatives = []
+		liste_codes_secrets = []
+		liste_premieres_tentatives = []
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			liste_codes_secrets.append(mm_temp.get_code_secret())
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			liste_premieres_tentatives.append(mm_temp0.get_code_secret())
+		for popsize in liste_popsize:
+			print("popsize :",popsize)
+			temps_AG = 0
+			nb_tentatives_AG = 0
+			for i in range(nbre_instances):
+				code_secret = liste_codes_secrets[i]
+				premiere_tentative_liste = liste_premieres_tentatives[i]
+				premiere_tentative = {}
+				for i in range(len(premiere_tentative_liste)):
+					premiere_tentative[i] = premiere_tentative_liste[i]
+				start_time = time.time()
+				nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+				temps_AG += time.time() - start_time
+				nb_tentatives_AG += nb_tentativesAG
+			yAG_temps.append(temps_AG/nbre_instances)
+			yAG_nb_tentatives.append(nb_tentatives_AG/nbre_instances)
+		liste_n_temps.append(yAG_temps)
+		liste_n_nb_tentatives.append(yAG_nb_tentatives)
+
+	titre = "Evolution du temps moyen de résolution en fonction de popsize"
+	plt.title(titre)
+	plt.xlabel("Taille de la population")
+	plt.ylabel("Temps moyen en secondes")	
+	for i in range(len(liste_n_temps)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_popsize, liste_n_temps[i], label=titre)
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_temps_popsize.png")
+	plt.show()
+
+	titre = "Evolution du nombre moyen d’essais nécessaires en fonction de popsize"
+	plt.title(titre)
+	plt.xlabel("Taille de la population")
+	plt.ylabel("Nombre moyen d’essais")	
+	for i in range(len(liste_n_nb_tentatives)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_popsize, liste_n_nb_tentatives[i], label=titre)	
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_nb_tentatives_popsize.png")
+	plt.show()
+
+#################################################################################################################################################################################################
+
+def graphe2_1_maxgen(tailles_n,nbre_instances,maxsize,popsize,cxpb,mutpb):
+	liste_maxgen = []
+	for i in range(1,11):
+		liste_maxgen.append(i*10)
+	liste_n_temps = []
+	liste_n_nb_tentatives = []
+	for n in tailles_n:
+		yAG_temps = []
+		yAG_nb_tentatives = []
+		liste_codes_secrets = []
+		liste_premieres_tentatives = []
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			liste_codes_secrets.append(mm_temp.get_code_secret())
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			liste_premieres_tentatives.append(mm_temp0.get_code_secret())
+		for maxgen in liste_maxgen:
+			print("maxgen :",maxgen)
+			temps_AG = 0
+			nb_tentatives_AG = 0
+			for i in range(nbre_instances):
+				code_secret = liste_codes_secrets[i]
+				premiere_tentative_liste = liste_premieres_tentatives[i]
+				premiere_tentative = {}
+				for i in range(len(premiere_tentative_liste)):
+					premiere_tentative[i] = premiere_tentative_liste[i]
+				start_time = time.time()
+				nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=0,maxsize=maxsize,popsize=maxgen,CXPB=cxpb,MUTPB=mutpb) 
+				temps_AG += time.time() - start_time
+				nb_tentatives_AG += nb_tentativesAG
+			yAG_temps.append(temps_AG/nbre_instances)
+			yAG_nb_tentatives.append(nb_tentatives_AG/nbre_instances)
+		liste_n_temps.append(yAG_temps)
+		liste_n_nb_tentatives.append(yAG_nb_tentatives)
+
+	titre = "Evolution du temps moyen de résolution en fonction de maxgen"
+	plt.title(titre)
+	plt.xlabel("Nombre de générations")
+	plt.ylabel("Temps moyen en secondes")	
+	for i in range(len(liste_n_temps)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_maxgen, liste_n_temps[i], label=titre)
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_temps_maxgen.png")
+	plt.show()
+
+	titre = "Evolution du nombre moyen d’essais nécessaires en fonction de maxgen"
+	plt.title(titre)
+	plt.xlabel("Nombre de générations")
+	plt.ylabel("Nombre moyen d’essais")	
+	for i in range(len(liste_n_nb_tentatives)):
+		titre = "n = "+str(tailles_n[i])
+		plt.plot(liste_maxgen, liste_n_nb_tentatives[i], label=titre)	
+	plt.legend()
+	plt.grid()
+	plt.savefig("2_1_nb_tentatives_maxgen.png")
+	plt.show()
+
 #################################################################################################################################################################################################
 
 def graphe2_2(tailles_n,nbre_instances,maxsize,maxgen,popsize,cxpb,mutpb):
