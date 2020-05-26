@@ -623,11 +623,50 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 												individu[i] = individu_random[i]
 									else:
 										if random.random() < MUTPB:
-											child = random.choice(parents_temp)
-											alea = random.randint(0,len(child)-1)
-											child[0][alea] = random.choice(D)
-											for i in range(n):
-												individu[i] = child[0][i]
+											temp_rand = random.random()
+											if temp_rand < 0.33: # mutation classique
+												child = random.choice(parents_temp)
+												alea = random.randint(0,len(child[0]))
+												child[0][alea] = random.choice(D)
+												for i in range(n):
+													individu[i] = child[0][i]
+											elif temp_rand < 0.66: # inversion de séquence
+												child = random.choice(parents_temp)
+												alea0 = random.randint(0,len(child[0])-1)
+												alea1 = random.randint(0,len(child[0]))
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												while(alea1-1 <= alea0):
+													alea0 = random.randint(0,len(child[0])-1)
+													alea1 = random.randint(0,len(child[0]))
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												temp = []
+												for k,v in child[0].items():
+													temp.append(v)
+												temp = temp[alea0:alea1]
+												temp.reverse()
+												#print("temp :",temp)
+												temp_indice = 0
+												for i in range(alea0,alea1):
+													child[0][i] = temp[temp_indice]
+													temp_indice += 1
+												#print("apres child :",child)
+												for i in range(n):
+													individu[i] = child[0][i]
+												#input()
+											else: # permutation
+												child = random.choice(parents_temp)
+												alea0 = random.randint(0,len(child[0])-1)
+												alea1 = random.randint(0,len(child[0])-1)
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												while(alea1 == alea0):
+													alea1 = random.randint(0,len(child[0])-1)
+												temp0 = child[0][alea0]
+												temp1 = child[0][alea1]
+												child[0][alea0] = temp1
+												child[0][alea1] = temp0
+												#print("apres child :",child)
+												for i in range(n):
+													individu[i] = child[0][i]
 										else:
 											individu_random = random.choice(parents_temp)[0]
 											for i in range(n):
@@ -683,7 +722,8 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							population_copie = deepcopy(population)
 							for i in range(len(population_copie)):
 								hof_individu,hof_fitness = min(population_copie, key = lambda t: t[1])
-								if hof_fitness > seuil or (hof_individu,hof_fitness) in E: # ça ne sert à rien de continuer
+								population_copie.remove((hof_individu,hof_fitness))
+								if hof_fitness > seuil or (hof_individu,hof_fitness) in E: # ça ne sert à rien de continuer, évite de remettre le même code dans E
 									break
 								uniques_values = []
 								for key, d in hof_individu.items():
@@ -698,9 +738,8 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 											E.append((hof_individu,hof_fitness))
 											#print(hof_individu,hof_fitness)
 											break
-								else:
-									population_copie.remove((hof_individu,hof_fitness))
-
+								#else:
+									#population_copie.remove((hof_individu,hof_fitness))
 							if len(E) == maxsize:
 								break
 
@@ -708,11 +747,13 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 						#print("E :",E)
 						if len(E) == 0:
 							temp_time = (time.time() - start_time)
-							#print("Temps d'exécution : %s secondes ---" % temp_time)
+							#print("E vide : Temps d'exécution : %s secondes ---" % temp_time)
 							if temp_time > 300:
 								continuer = False
 								print("Echec de l'algorithme génétique. \n")
 						else:
+							#print("E :",E)
+							#print("taille de E :",len(E))
 							if strategie_algo_genetique == 0:													
 								res,res_individu_fitness = random.choice(E) # random
 							elif strategie_algo_genetique == 1:
@@ -761,6 +802,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							elif strategie_algo_genetique == 5:
 								# Estimation du nombre de codes compatibles restants si un code était tenté
 								longueur_S = len(E)
+								#longueur_S = 10
 								estimations = []
 								S = []
 								E_copy = deepcopy(E)
@@ -768,6 +810,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									if len(E_copy) == 0:
 										break
 									temp = random.choice(E_copy)
+									E_copy.remove(temp)
 									S.append(temp)
 								for c in E:
 									remain = 0
@@ -797,6 +840,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 											if mm_temp.get_states()[len(mm_temp.get_states())][1] == mm_temp0.get_states()[len(mm_temp.get_states())][1] and mm_temp.get_states()[len(mm_temp.get_states())][2] == mm_temp0.get_states()[len(mm_temp.get_states())][2]:
 												remain += 1
 									estimations.append(remain)
+								#print("estimations :",estimations)
 								res,res_individu_fitness = E[estimations.index(min(estimations))]
 							elif strategie_algo_genetique == 6:
 								# Estimation du nombre de codes compatibles restants si un code était tenté
@@ -808,6 +852,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									if len(E_copy) == 0:
 										break
 									temp = random.choice(E_copy)
+									E_copy.remove(temp)
 									S.append(temp)
 								for c in E:
 									remain = 0
@@ -837,8 +882,10 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 											if mm_temp.get_states()[len(mm_temp.get_states())][1] == mm_temp0.get_states()[len(mm_temp.get_states())][1] and mm_temp.get_states()[len(mm_temp.get_states())][2] == mm_temp0.get_states()[len(mm_temp.get_states())][2]:
 												remain += 1
 									estimations.append(remain)
+								#print("estimations :",estimations)
 								res,res_individu_fitness = E[estimations.index(max(estimations))]
 							continuer = False
+				#print("res :",res)
 			
 			#################################################################################################################################################################################################
 			if len(res) == 0:
@@ -851,7 +898,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 				print("\nTemps limite atteint : aucun code compatible de trouvé. \n")
 				print("Arrêt sans victoire au bout de",mastermind.get_nb_tentatives(),"tentative(s).")
 				print("La bonne réponse était :",reponse,"\n")
-				input()
+				#input()
 				break
 
 			mastermind.create_code_tentative(res) # on incrémente ici le nombre de tentatives
@@ -1428,7 +1475,7 @@ def graphe2_1_mutpb(tailles_n,nbre_instances,maxsize,maxgen,popsize,cxpb):
 		liste_n_temps.append(yAG_temps)
 		liste_n_nb_tentatives.append(yAG_nb_tentatives)
 
-	titre = "Evolution du temps moyen de résolution en fonction de mutpb avec n = "+str(n)
+	titre = "Evolution du temps moyen de résolution en fonction de mutpb"
 	plt.title(titre)
 	plt.xlabel("Probabilité de mutation")
 	plt.ylabel("Temps moyen en secondes")	
@@ -1440,7 +1487,7 @@ def graphe2_1_mutpb(tailles_n,nbre_instances,maxsize,maxgen,popsize,cxpb):
 	plt.savefig("2_1_temps_mutpb.png")
 	plt.show()
 
-	titre = "Evolution du nombre moyen d’essais nécessaires en fonction de mutpb avec n ="+str(n)
+	titre = "Evolution du nombre moyen d’essais nécessaires en fonction de mutpb"
 	plt.title(titre)
 	plt.xlabel("Probabilité de mutation")
 	plt.ylabel("Nombre moyen d’essais")	
@@ -1593,7 +1640,7 @@ def graphe2_1_popsize(tailles_n,nbre_instances,maxsize,maxgen,cxpb,mutpb):
 			mm_temp0.create_code_secret_random()
 			liste_premieres_tentatives.append(mm_temp0.get_code_secret())
 		for popsize in liste_popsize:
-			print("popsize :",popsize)
+			#print("popsize :",popsize)
 			temps_AG = 0
 			nb_tentatives_AG = 0
 			for i in range(nbre_instances):
@@ -1656,7 +1703,7 @@ def graphe2_1_maxgen(tailles_n,nbre_instances,maxsize,popsize,cxpb,mutpb):
 			mm_temp0.create_code_secret_random()
 			liste_premieres_tentatives.append(mm_temp0.get_code_secret())
 		for maxgen in liste_maxgen:
-			print("maxgen :",maxgen)
+			#print("maxgen :",maxgen)
 			temps_AG = 0
 			nb_tentatives_AG = 0
 			for i in range(nbre_instances):

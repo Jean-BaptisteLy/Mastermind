@@ -623,11 +623,50 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 												individu[i] = individu_random[i]
 									else:
 										if random.random() < MUTPB:
-											child = random.choice(parents_temp)
-											alea = random.randint(0,len(child)-1)
-											child[0][alea] = random.choice(D)
-											for i in range(n):
-												individu[i] = child[0][i]
+											temp_rand = random.random()
+											if temp_rand < 0.33: # mutation classique
+												child = random.choice(parents_temp)
+												alea = random.randint(0,len(child[0]))
+												child[0][alea] = random.choice(D)
+												for i in range(n):
+													individu[i] = child[0][i]
+											elif temp_rand < 0.66: # inversion de séquence
+												child = random.choice(parents_temp)
+												alea0 = random.randint(0,len(child[0])-1)
+												alea1 = random.randint(0,len(child[0]))
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												while(alea1-1 <= alea0):
+													alea0 = random.randint(0,len(child[0])-1)
+													alea1 = random.randint(0,len(child[0]))
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												temp = []
+												for k,v in child[0].items():
+													temp.append(v)
+												temp = temp[alea0:alea1]
+												temp.reverse()
+												#print("temp :",temp)
+												temp_indice = 0
+												for i in range(alea0,alea1):
+													child[0][i] = temp[temp_indice]
+													temp_indice += 1
+												#print("apres child :",child)
+												for i in range(n):
+													individu[i] = child[0][i]
+												#input()
+											else: # permutation
+												child = random.choice(parents_temp)
+												alea0 = random.randint(0,len(child[0])-1)
+												alea1 = random.randint(0,len(child[0])-1)
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												while(alea1 == alea0):
+													alea1 = random.randint(0,len(child[0])-1)
+												temp0 = child[0][alea0]
+												temp1 = child[0][alea1]
+												child[0][alea0] = temp1
+												child[0][alea1] = temp0
+												#print("apres child :",child)
+												for i in range(n):
+													individu[i] = child[0][i]
 										else:
 											individu_random = random.choice(parents_temp)[0]
 											for i in range(n):
@@ -683,7 +722,8 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							population_copie = deepcopy(population)
 							for i in range(len(population_copie)):
 								hof_individu,hof_fitness = min(population_copie, key = lambda t: t[1])
-								if hof_fitness > seuil or (hof_individu,hof_fitness) in E: # ça ne sert à rien de continuer
+								population_copie.remove((hof_individu,hof_fitness))
+								if hof_fitness > seuil or (hof_individu,hof_fitness) in E: # ça ne sert à rien de continuer, évite de remettre le même code dans E
 									break
 								uniques_values = []
 								for key, d in hof_individu.items():
@@ -698,9 +738,8 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 											E.append((hof_individu,hof_fitness))
 											#print(hof_individu,hof_fitness)
 											break
-								else:
-									population_copie.remove((hof_individu,hof_fitness))
-
+								#else:
+									#population_copie.remove((hof_individu,hof_fitness))
 							if len(E) == maxsize:
 								break
 
@@ -708,11 +747,13 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 						#print("E :",E)
 						if len(E) == 0:
 							temp_time = (time.time() - start_time)
-							#print("Temps d'exécution : %s secondes ---" % temp_time)
+							#print("E vide : Temps d'exécution : %s secondes ---" % temp_time)
 							if temp_time > 300:
 								continuer = False
 								print("Echec de l'algorithme génétique. \n")
 						else:
+							#print("E :",E)
+							#print("taille de E :",len(E))
 							if strategie_algo_genetique == 0:													
 								res,res_individu_fitness = random.choice(E) # random
 							elif strategie_algo_genetique == 1:
@@ -761,6 +802,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							elif strategie_algo_genetique == 5:
 								# Estimation du nombre de codes compatibles restants si un code était tenté
 								longueur_S = len(E)
+								#longueur_S = 10
 								estimations = []
 								S = []
 								E_copy = deepcopy(E)
@@ -768,6 +810,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									if len(E_copy) == 0:
 										break
 									temp = random.choice(E_copy)
+									E_copy.remove(temp)
 									S.append(temp)
 								for c in E:
 									remain = 0
@@ -797,6 +840,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 											if mm_temp.get_states()[len(mm_temp.get_states())][1] == mm_temp0.get_states()[len(mm_temp.get_states())][1] and mm_temp.get_states()[len(mm_temp.get_states())][2] == mm_temp0.get_states()[len(mm_temp.get_states())][2]:
 												remain += 1
 									estimations.append(remain)
+								#print("estimations :",estimations)
 								res,res_individu_fitness = E[estimations.index(min(estimations))]
 							elif strategie_algo_genetique == 6:
 								# Estimation du nombre de codes compatibles restants si un code était tenté
@@ -808,6 +852,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									if len(E_copy) == 0:
 										break
 									temp = random.choice(E_copy)
+									E_copy.remove(temp)
 									S.append(temp)
 								for c in E:
 									remain = 0
@@ -837,8 +882,10 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 											if mm_temp.get_states()[len(mm_temp.get_states())][1] == mm_temp0.get_states()[len(mm_temp.get_states())][1] and mm_temp.get_states()[len(mm_temp.get_states())][2] == mm_temp0.get_states()[len(mm_temp.get_states())][2]:
 												remain += 1
 									estimations.append(remain)
+								#print("estimations :",estimations)
 								res,res_individu_fitness = E[estimations.index(max(estimations))]
 							continuer = False
+				#print("res :",res)
 			
 			#################################################################################################################################################################################################
 			if len(res) == 0:
@@ -902,8 +949,8 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 # Tests :
 
-n = 6
-joueur = 5
+n = 5
+joueur = 8
 strategie_algo_genetique = 0
 '''
 maxsize = 70
@@ -912,9 +959,9 @@ popsize = 70 #50
 CXPB = 0.7 #0.8
 MUTPB = 0.8 #0.8
 '''
-maxsize = 10
-maxgen = 20
-popsize = 10
+maxsize = 20
+maxgen = 50
+popsize = 50
 CXPB = 0.8
 MUTPB = 0.8
 
@@ -946,25 +993,25 @@ print("Joueur",joueur,"en cours d'exécution...")
 start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-
-joueur = 7
+'''
+joueur = 8
 print("Joueur",joueur,"en cours d'exécution...")
 start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-
+'''
 joueur = 6
 print("Joueur",joueur,"en cours d'exécution...")
 start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-'''
+
 joueur = 1
 print("Joueur",joueur,"en cours d'exécution...")
 start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
-'''
+
 joueur = 2
 print("Joueur",joueur,"en cours d'exécution...")
 start_time = time.time()
