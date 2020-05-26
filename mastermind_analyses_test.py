@@ -521,7 +521,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 					res,nbre_noeuds_temp = RAC_forward_checking_ameliore(i,nbreVar,D,n,states)
 					nbre_noeuds += nbre_noeuds_temp
 					#print("Nombre de noeuds (en comptant les précédents) :",nbre_noeuds)
-					input()
+					#input()
 
 			#################################################################################################################################################################################################
 
