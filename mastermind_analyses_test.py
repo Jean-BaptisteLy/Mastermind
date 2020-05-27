@@ -564,12 +564,9 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 						temp = random.choice(D_temp)
 						res[i] = temp
 						D_temp.remove(temp)
-					historique = {}
 
 				else:
 					# Evaluation de l'historique en fonction du secret
-					fitness = (mastermind.get_n()*2) * mastermind.get_states()[mastermind.get_nb_tentatives()][1] + mastermind.get_states()[mastermind.get_nb_tentatives()][2]
-					historique[mastermind.get_nb_tentatives()] = fitness
 					population = []
 					nouvelle_population = []
 
@@ -672,9 +669,9 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 											for i in range(n):
 												individu[i] = individu_random[i]
 
-								# Test de l'individu par rapport à l'historique
+								# Test de l'individu par rapport aux tentatives
 								mm_temp = Mastermind(n)
-								fitnessN = 0
+								fitness = 0
 								for t,s in mastermind.get_states().items():
 									code_temp = []
 									for i in s[0].values():
@@ -682,13 +679,10 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									mm_temp.create_code_secret(code_temp)
 									mm_temp.create_code_tentative(individu)
 									mm_temp.comparaison()
-									fitness = (mm_temp.get_n()*2) * mm_temp.get_states()[mm_temp.get_nb_tentatives()][1] + mm_temp.get_states()[mm_temp.get_nb_tentatives()][2]
-									
-									if mastermind.get_nb_tentatives() > 0:
-										fitnessN += abs(fitness - historique[t])
-									else:
-										fitnessN = fitness
-								nouvelle_population.append((individu,fitnessN))
+									#fitness += (mm_temp.get_n()*2) * mm_temp.get_states()[mm_temp.get_nb_tentatives()][1] + mm_temp.get_states()[mm_temp.get_nb_tentatives()][2]
+									fitness += abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])						
+								#fitness += 2 * n * (mastermind.get_nb_tentatives() - 1)
+								nouvelle_population.append((individu,fitness))
 
 							# Nouvelle population :
 
@@ -718,29 +712,25 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							#print("population :",population)
 
 							# sélectif du hall of fame compatible à mettre dans E
-							seuil = 99999999999999 # facultatif : à mettre très grand pour que ça devienne inexistant
 							population_copie = deepcopy(population)
 							for i in range(len(population_copie)):
-								hof_individu,hof_fitness = min(population_copie, key = lambda t: t[1])
-								population_copie.remove((hof_individu,hof_fitness))
-								if hof_fitness > seuil or (hof_individu,hof_fitness) in E: # ça ne sert à rien de continuer, évite de remettre le même code dans E
+								hof_individu,hof_fitness = min(population_copie, key = lambda t: t[1])								
+								if hof_fitness != 0: # ça ne sert à rien de continuer
 									break
+								population_copie.remove((hof_individu,hof_fitness))	
+								if (hof_individu,hof_fitness) in E: # évite de remettre le même code dans E
+									continue
+								# vérification de la consistance locale (caractères uniques)
 								uniques_values = []
 								for key, d in hof_individu.items():
 								    if d[0] not in uniques_values:
 								        uniques_values.append(d[0])
-								if len(uniques_values) == len(hof_individu):
-									if hof_fitness < seuil:	# réussite
-										code_temp = []
-										for i in hof_individu.values():
-											code_temp.append(i)
-										if compatibilite(mastermind.get_n(),mastermind.get_states(),code_temp):
-											E.append((hof_individu,hof_fitness))
-											#print(hof_individu,hof_fitness)
-											break
-								#else:
-									#population_copie.remove((hof_individu,hof_fitness))
-							if len(E) == maxsize:
+								if len(uniques_values) == len(hof_individu): # si caractères uniques alors on append
+									E.append((hof_individu,hof_fitness))
+									if len(E) >= maxsize: # si on dépasse maxsize après l'append, on break
+										break
+
+							if len(E) >= maxsize:
 								break
 
 						#print("dernière population :",population)
@@ -751,16 +741,25 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							if temp_time > 300:
 								continuer = False
 								print("Echec de l'algorithme génétique. \n")
+								'''
+								res = {}
+								if mastermind.get_nb_tentatives() == 0:
+									res = premiere_tentative
+								else:
+									i = []
+									nbreVar = n
+									states = mastermind.get_states()
+									res,nbre_noeuds_temp = RAC_forward_checking_ameliore(i,nbreVar,D,n,states)
+									nbre_noeuds += nbre_noeuds_temp
+									#print("Nombre de noeuds (en comptant les précédents) :",nbre_noeuds)
+									#input()
+								'''
 						else:
 							#print("E :",E)
 							#print("taille de E :",len(E))
 							if strategie_algo_genetique == 0:													
 								res,res_individu_fitness = random.choice(E) # random
 							elif strategie_algo_genetique == 1:
-								res,res_individu_fitness = min(E, key = lambda t: t[1]) # sélectionne la meilleure fitness
-							elif strategie_algo_genetique == 2:
-								res,res_individu_fitness = max(E, key = lambda t: t[1]) # sélectionne la pire fitness
-							elif strategie_algo_genetique == 3:
 								# Choix du code présentant le plus de similarité avec les autres codes compatibles.
 								similaires = []
 								for c in E:
@@ -779,7 +778,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 										temp_similarite += mm_temp.get_states()[len(mm_temp.get_states())][1] + mm_temp.get_states()[len(mm_temp.get_states())][2]
 									similaires.append(temp_similarite)
 								res,res_individu_fitness = E[similaires.index(max(similaires))] # le plus de similarités
-							elif strategie_algo_genetique == 4:
+							elif strategie_algo_genetique == 2:
 								# Choix du code présentant le moins de similarité avec les autres codes compatibles.
 								similaires = []
 								for c in E:
@@ -799,7 +798,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									similaires.append(temp_similarite)
 								res,res_individu_fitness = E[similaires.index(min(similaires))] # le moins de similarités
 
-							elif strategie_algo_genetique == 5:
+							elif strategie_algo_genetique == 3:
 								# Estimation du nombre de codes compatibles restants si un code était tenté
 								longueur_S = len(E)
 								#longueur_S = 10
@@ -842,7 +841,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									estimations.append(remain)
 								#print("estimations :",estimations)
 								res,res_individu_fitness = E[estimations.index(min(estimations))]
-							elif strategie_algo_genetique == 6:
+							elif strategie_algo_genetique == 4:
 								# Estimation du nombre de codes compatibles restants si un code était tenté
 								longueur_S = len(E)
 								estimations = []
@@ -949,7 +948,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 # Tests :
 
-n = 5
+n = 4
 joueur = 8
 strategie_algo_genetique = 0
 '''
@@ -959,7 +958,7 @@ popsize = 70 #50
 CXPB = 0.7 #0.8
 MUTPB = 0.8 #0.8
 '''
-maxsize = 20
+maxsize = 60
 maxgen = 50
 popsize = 50
 CXPB = 0.8
