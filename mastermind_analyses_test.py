@@ -729,8 +729,10 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 								# Test de l'individu par rapport aux tentatives
 								mm_temp = Mastermind(n)
 								fitness = 0
+								'''
 								difference_max_avant = 0
 								difference_max_apres = 0
+								'''
 								for t,s in mastermind.get_states().items():
 									code_temp = []
 									for i in s[0].values():
@@ -739,9 +741,11 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 									mm_temp.create_code_tentative(individu)
 									mm_temp.comparaison()								
 									fitness += abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])
+									'''
 									difference_max_avant = abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])
 									if difference_max_avant > difference_max_apres:
 										difference_max_apres = difference_max_avant
+									'''
 								nouvelle_population.append((individu,fitness))
 
 							# Nouvelle population :
@@ -794,38 +798,41 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 								break
 
 							# CSP mi génétique
-							for pc in range(len(population_copie)):
-								individu_dico,fitness = population_copie[pc]
-								#print(individu_dico,fitness)
-								individu_liste = []
-								for key, d in individu_dico.items():
-									individu_liste.append(d[0])
-								#print("code_secret :",code_secret)
-								#print("states :",mastermind.get_states())
-								#print("avant individu_liste :",individu_liste)
-								#print("difference_max_apres :",difference_max_apres)
-								#for fit in range(1,fitness+1):
-								for fit in range(1,int(n/2)):
-								#for fit in range(1,difference_max_apres+1):
-									#print("fit :",fit)
-									del individu_liste[-1]
-								#print("apres individu_liste :",individu_liste)
-								while len(set(individu_liste)) != len(individu_liste):
-									fit += 1
-									del individu_liste[-1]
-								i = individu_liste
-								nbreVar = len(individu_liste) - fit
-								D_CSP = D.copy()
-								for dcsp in individu_liste:
-									D_CSP.remove(dcsp)
-								individu,nbre_noeuds_temp,compatible = RAC_forward_checking_ameliore_AG(i,nbreVar,D_CSP,n,mastermind.get_states())
-								nbre_noeuds += nbre_noeuds_temp
-								if compatible == True and (individu,0) not in E:
-									#print("j'ajoute dans E le code",individu)
-									#input()
-									E.append((individu,0))
-								if len(E) >= maxsize:
-									break
+							if len(E) < maxsize: # seuil facultatif, à mettre inférieur à maxsize pour l'annuler
+								for pc in range(int(len(population_copie)/10)):
+									#print(pc)
+									individu_dico,fitness = population_copie[pc]
+									#print(individu_dico,fitness)
+									individu_liste = []
+									for key, d in individu_dico.items():
+										individu_liste.append(d[0])
+									#print("code_secret :",code_secret)
+									#print("states :",mastermind.get_states())
+									#print("avant individu_liste :",individu_liste)
+									#print("difference_max_apres :",difference_max_apres)
+									#for fit in range(1,fitness+1):
+									for fit in range(1,int(n/2)):
+									#for fit in range(1,difference_max_apres+1):
+										#print("fit :",fit)
+										del individu_liste[-1]
+									#print("apres individu_liste :",individu_liste)
+									while len(set(individu_liste)) != len(individu_liste):
+										fit += 1
+										del individu_liste[-1]
+									i = individu_liste
+									nbreVar = len(individu_liste) - fit
+									D_CSP = D.copy()
+									for dcsp in individu_liste:
+										D_CSP.remove(dcsp)
+									individu,nbre_noeuds_temp,compatible = RAC_forward_checking_ameliore_AG(i,nbreVar,D_CSP,n,mastermind.get_states())
+									nbre_noeuds += nbre_noeuds_temp
+									if compatible == True and (individu,0) not in E:
+										#print("j'ajoute dans E le code",individu)
+										#input()
+										E.append((individu,0))
+										#print(E)
+										if len(E) >= maxsize:
+											break
 
 							if len(E) >= maxsize:
 								break
@@ -838,6 +845,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 							if temp_time > 300:
 								continuer = False
 								print("Echec de l'algorithme génétique. \n")
+								# On pourrait donner la main à l'algorithme A5 (ou A7) ici
 								'''
 								res = {}
 								if mastermind.get_nb_tentatives() == 0:
@@ -1045,8 +1053,8 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 # Tests :
 
-n = 5
-joueur = 5
+n = 4
+joueur = 8
 strategie_algo_genetique = 0
 '''
 maxsize = 70
@@ -1056,8 +1064,8 @@ CXPB = 0.7 #0.8
 MUTPB = 0.8 #0.8
 '''
 maxsize = 60
-maxgen = 50
-popsize = 50
+maxgen = 70
+popsize = 70
 CXPB = 0.8
 MUTPB = 0.8
 
@@ -1090,7 +1098,6 @@ start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
 print("Joueur",joueur,":","Nombre de tentatives :",nb_tentatives,"; Nombre de noeuds :",nbre_noeuds,"; Temps d'exécution :",time.time() - start_time,"secondes.")
 '''
-joueur = 8
 print("Joueur",joueur,"en cours d'exécution...")
 start_time = time.time()
 nb_tentatives,nbre_noeuds = run(n,joueur,code_secret,premiere_tentative_dico,strategie_algo_genetique,maxsize,maxgen,popsize,CXPB,MUTPB)
