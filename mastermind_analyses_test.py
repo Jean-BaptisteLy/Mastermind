@@ -305,7 +305,7 @@ def RAC_forward_checking_ameliore(i,nbreVar,D,n,states):
 			D_bis = D.copy()
 			D_bis.remove(v)
 			noeud = i + list(v)
-			print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
+			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
 			nbre_noeuds += 1
 			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
 				i_dico = {}
@@ -405,8 +405,65 @@ def RAC_forward_checking_ameliore_LasVegas(i,nbreVar,D,n,states):
 					break
 	return i,nbre_noeuds
 
+def RAC_forward_checking_ameliore_AG(i,nbreVar,D,n,states):
+	'''
+	i : instanciation courante
+	V : liste de variables non-instanciées dans i
+	D : domaines des variables
+	n, states : les contraintes
+	'''
+	compatible = False
+	nbre_noeuds = 0
+	if nbreVar == 0:
+		return i,nbre_noeuds,False
+	else:
+		nbreVar -= 1
+		for v in D:
+			D_bis = D.copy()
+			D_bis.remove(v)
+			noeud = i + list(v)
+			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
+			nbre_noeuds += 1
+			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
+				i_dico = {}
+				for j in range(len(noeud)):
+					i_dico[j] = noeud[j]
+				if n == len(noeud): # code complet			
+					if compatibilite(n,states,i_dico): # si le code est compatible, on le prend
+						return i_dico,nbre_noeuds,True
+					else:
+						return i_dico,nbre_noeuds,False
+				elif n > len(noeud):
+					compatible = True
+					mm_temp = Mastermind(n)
+					for t,s in states.items():
+						code_temp = []
+						for j in s[0].values():
+							code_temp.append(j)
+						mm_temp.create_code_secret(code_temp) # liste
+						mm_temp.create_code_tentative(i_dico) # dico
+						mm_temp.comparaison()
+						if mm_temp.get_states()[len(mm_temp.get_states())][1] > s[1] or mm_temp.get_states()[len(mm_temp.get_states())][2] > s[2]:
+							compatible = False
+							break
+					if compatible == False:
+						continue
+					else:
+						compatible = True
+				else:
+					break
+				res,nbre_noeuds_temp,compatible = RAC_forward_checking_ameliore_AG(i+list(v),nbreVar,D_bis,n,states)
+				nbre_noeuds += nbre_noeuds_temp
+				if len(res) == n and compatibilite(n,states,res):
+					i = res
+					compatible = True
+					break
+	return i,nbre_noeuds,compatible
+
 def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1: '1', 2: '2', 3: '3'},strategie_algo_genetique=0,maxsize=10,maxgen=105,popsize=50,CXPB=0.6,MUTPB=0.4):
 
+	difference_max_avant = 0
+	difference_max_apres = 0
 	nbre_noeuds = 0
 	if (joueur == 0):
 		print("Ok.")
@@ -672,16 +729,19 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 								# Test de l'individu par rapport aux tentatives
 								mm_temp = Mastermind(n)
 								fitness = 0
+								difference_max_avant = 0
+								difference_max_apres = 0
 								for t,s in mastermind.get_states().items():
 									code_temp = []
 									for i in s[0].values():
 										code_temp.append(i)
 									mm_temp.create_code_secret(code_temp)
 									mm_temp.create_code_tentative(individu)
-									mm_temp.comparaison()
-									#fitness += (mm_temp.get_n()*2) * mm_temp.get_states()[mm_temp.get_nb_tentatives()][1] + mm_temp.get_states()[mm_temp.get_nb_tentatives()][2]
-									fitness += abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])						
-								#fitness += 2 * n * (mastermind.get_nb_tentatives() - 1)
+									mm_temp.comparaison()								
+									fitness += abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])
+									difference_max_avant = abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])
+									if difference_max_avant > difference_max_apres:
+										difference_max_apres = difference_max_avant
 								nouvelle_population.append((individu,fitness))
 
 							# Nouvelle population :
@@ -723,12 +783,49 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 								# vérification de la consistance locale (caractères uniques)
 								uniques_values = []
 								for key, d in hof_individu.items():
-								    if d[0] not in uniques_values:
-								        uniques_values.append(d[0])
+									if d[0] not in uniques_values:
+										uniques_values.append(d[0])
 								if len(uniques_values) == len(hof_individu): # si caractères uniques alors on append
 									E.append((hof_individu,hof_fitness))
 									if len(E) >= maxsize: # si on dépasse maxsize après l'append, on break
 										break
+
+							if len(E) >= maxsize:
+								break
+
+							# CSP mi génétique
+							for pc in range(len(population_copie)):
+								individu_dico,fitness = population_copie[pc]
+								#print(individu_dico,fitness)
+								individu_liste = []
+								for key, d in individu_dico.items():
+									individu_liste.append(d[0])
+								#print("code_secret :",code_secret)
+								#print("states :",mastermind.get_states())
+								#print("avant individu_liste :",individu_liste)
+								#print("difference_max_apres :",difference_max_apres)
+								#for fit in range(1,fitness+1):
+								for fit in range(1,int(n/2)):
+								#for fit in range(1,difference_max_apres+1):
+									#print("fit :",fit)
+									del individu_liste[-1]
+								#print("apres individu_liste :",individu_liste)
+								while len(set(individu_liste)) != len(individu_liste):
+									fit += 1
+									del individu_liste[-1]
+								i = individu_liste
+								nbreVar = len(individu_liste) - fit
+								D_CSP = D.copy()
+								for dcsp in individu_liste:
+									D_CSP.remove(dcsp)
+								individu,nbre_noeuds_temp,compatible = RAC_forward_checking_ameliore_AG(i,nbreVar,D_CSP,n,mastermind.get_states())
+								nbre_noeuds += nbre_noeuds_temp
+								if compatible == True and (individu,0) not in E:
+									#print("j'ajoute dans E le code",individu)
+									#input()
+									E.append((individu,0))
+								if len(E) >= maxsize:
+									break
 
 							if len(E) >= maxsize:
 								break
@@ -948,8 +1045,8 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 # Tests :
 
-n = 4
-joueur = 8
+n = 5
+joueur = 5
 strategie_algo_genetique = 0
 '''
 maxsize = 70
