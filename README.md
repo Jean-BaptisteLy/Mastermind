@@ -8,8 +8,8 @@ L'énoncé complet du projet est dans le fichier `projet20.pdf`.
 
 Les documents contiennent les articles et cours qui ont été utiles à l'élaboration du projet.
 
-Dans le cadre du projet, utiliser les fichiers jupyter-notebook `mastermind_courbes.ipynb` et `mastermind_demonstration.ipynb` avec le répertoire `algorithmes`.
+Dans le cadre du projet, utiliser les fichiers jupyter-notebook `mastermind_courbes.ipynb` et `mastermind_demonstration.ipynb` avec le répertoire `algorithmes`. (Les plus à jour)
 
-Le fichier `mastermind.py` est destiné au jeu. Il est fait pour être joué. (non fini, utilise des algorithmes possédant des défauts)
+Le fichier `mastermind.py` est destiné au jeu. Il est fait pour être joué. (non mis à jour, utilise des algorithmes possédant des défauts).
 
 Le fichier `mastermind_analyses_test.py` est destiné aux tests, il n'est pas destiné à être utilisé.
