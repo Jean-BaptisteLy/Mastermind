@@ -10,8 +10,6 @@ Les documents contiennent les articles et cours qui ont été utiles à l'élabo
 
 Dans le cadre du projet, utiliser les fichiers jupyter-notebook `mastermind_courbes.ipynb` et `mastermind_demonstration.ipynb` avec le répertoire `algorithmes`.
 
-Le fichier `mastermind.py` est destiné au jeu. Il est fait pour être joué.
-
-Le fichier `mastermind_analyses.py` est destiné aux analyses, il est à utiliser avec le fichier jupyter-notebook.
+Le fichier `mastermind.py` est destiné au jeu. Il est fait pour être joué. (non fini, utilise des algorithmes possédant des défauts)
 
 Le fichier `mastermind_analyses_test.py` est destiné aux tests, il n'est pas destiné à être utilisé.
