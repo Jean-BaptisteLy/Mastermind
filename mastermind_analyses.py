@@ -405,6 +405,61 @@ def RAC_forward_checking_ameliore_LasVegas(i,nbreVar,D,n,states):
 					break
 	return i,nbre_noeuds
 
+def RAC_forward_checking_ameliore_AG(i,nbreVar,D,n,states):
+	'''
+	i : instanciation courante
+	V : liste de variables non-instanciées dans i
+	D : domaines des variables
+	n, states : les contraintes
+	'''
+	compatible = False
+	nbre_noeuds = 0
+	if nbreVar == 0:
+		return i,nbre_noeuds,False
+	else:
+		nbreVar -= 1
+		for v in D:
+			D_bis = D.copy()
+			D_bis.remove(v)
+			noeud = i + list(v)
+			#print("noeud :",noeud) # permet de voir tous les noeuds de l'arbre
+			nbre_noeuds += 1
+			if len(noeud) == len(set(noeud)): # si c'est localement consistant : caractères uniques
+				i_dico = {}
+				for j in range(len(noeud)):
+					i_dico[j] = noeud[j]
+				if n == len(noeud): # code complet			
+					if compatibilite(n,states,i_dico): # si le code est compatible, on le prend
+						return i_dico,nbre_noeuds,True
+					else:
+						return i_dico,nbre_noeuds,False
+				elif n > len(noeud):
+					compatible = True
+					mm_temp = Mastermind(n)
+					for t,s in states.items():
+						code_temp = []
+						for j in s[0].values():
+							code_temp.append(j)
+						mm_temp.create_code_secret(code_temp) # liste
+						mm_temp.create_code_tentative(i_dico) # dico
+						mm_temp.comparaison()
+						if mm_temp.get_states()[len(mm_temp.get_states())][1] > s[1] or mm_temp.get_states()[len(mm_temp.get_states())][2] > s[2]:
+							compatible = False
+							break
+					if compatible == False:
+						continue
+					else:
+						compatible = True
+				else:
+					break
+				res,nbre_noeuds_temp,compatible = RAC_forward_checking_ameliore_AG(i+list(v),nbreVar,D_bis,n,states)
+				nbre_noeuds += nbre_noeuds_temp
+				if len(res) == n and compatibilite(n,states,res):
+					i = res
+					compatible = True
+					break
+	return i,nbre_noeuds,compatible
+
 def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1: '1', 2: '2', 3: '3'},strategie_algo_genetique=0,maxsize=10,maxgen=105,popsize=50,CXPB=0.6,MUTPB=0.4):
 
 	nbre_noeuds = 0
@@ -435,7 +490,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 			'''
 			#################################################################################################################################################################################################
 			
-			if (joueur == 9):
+			if (joueur == 0):
 				res = []
 				print("Veuillez saisir votre code contenant",mastermind.get_n(),"caractères distincts :")
 				while(True):
@@ -525,7 +580,7 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 
 			#################################################################################################################################################################################################
 
-			elif (joueur == 6): # bonus : Las Vegas
+			elif (joueur == 6): # bonus : Las Vegas naïf
 				res = {}
 				if mastermind.get_nb_tentatives() == 0:
 					res = premiere_tentative
@@ -746,6 +801,390 @@ def run(n=4,joueur=0,code_secret=['0','1','2','3'],premiere_tentative={0: '0', 1
 								if mastermind.get_nb_tentatives() == 0:
 									res = premiere_tentative
 								else: # algorithme CSP qui prend le relai en cas d'échec
+									i = []
+									nbreVar = n
+									states = mastermind.get_states()
+									res,nbre_noeuds_temp = RAC_forward_checking_ameliore(i,nbreVar,D,n,states)
+									nbre_noeuds += nbre_noeuds_temp
+									#print("Nombre de noeuds (en comptant les précédents) :",nbre_noeuds)
+									#input()
+								'''
+						else:
+							#print("E :",E)
+							#print("taille de E :",len(E))
+							if strategie_algo_genetique == 0:													
+								res,res_individu_fitness = random.choice(E) # random
+							elif strategie_algo_genetique == 1:
+								# Choix du code présentant le plus de similarité avec les autres codes compatibles.
+								similaires = []
+								for c in E:
+									E_copy = deepcopy(E)
+									while c in E_copy:
+										E_copy.remove(c)
+									temp_similarite = 0
+									for c_etoile in E_copy:
+										mm_temp = Mastermind(n)
+										code_temp = []
+										for i in c_etoile[0].values():
+											code_temp.append(i)
+										mm_temp.create_code_secret(code_temp) #liste
+										mm_temp.create_code_tentative(c[0]) #dico
+										mm_temp.comparaison()
+										temp_similarite += mm_temp.get_states()[len(mm_temp.get_states())][1] + mm_temp.get_states()[len(mm_temp.get_states())][2]
+									similaires.append(temp_similarite)
+								res,res_individu_fitness = E[similaires.index(max(similaires))] # le plus de similarités
+							elif strategie_algo_genetique == 2:
+								# Choix du code présentant le moins de similarité avec les autres codes compatibles.
+								similaires = []
+								for c in E:
+									E_copy = deepcopy(E)
+									while c in E_copy:
+										E_copy.remove(c)
+									temp_similarite = 0
+									for c_etoile in E_copy:
+										mm_temp = Mastermind(n)
+										code_temp = []
+										for i in c_etoile[0].values():
+											code_temp.append(i)
+										mm_temp.create_code_secret(code_temp) #liste
+										mm_temp.create_code_tentative(c[0]) #dico
+										mm_temp.comparaison()
+										temp_similarite += mm_temp.get_states()[len(mm_temp.get_states())][1] + mm_temp.get_states()[len(mm_temp.get_states())][2]
+									similaires.append(temp_similarite)
+								res,res_individu_fitness = E[similaires.index(min(similaires))] # le moins de similarités
+
+							elif strategie_algo_genetique == 3:
+								# Estimation du nombre de codes compatibles restants si un code était tenté
+								longueur_S = len(E)
+								#longueur_S = 10
+								estimations = []
+								S = []
+								E_copy = deepcopy(E)
+								for i in range(longueur_S):
+									if len(E_copy) == 0:
+										break
+									temp = random.choice(E_copy)
+									E_copy.remove(temp)
+									S.append(temp)
+								for c in E:
+									remain = 0
+									S_copy = deepcopy(S)
+									while c in S_copy:
+										S_copy.remove(c)
+									for c_etoile in S_copy:
+										mm_temp = Mastermind(n)
+										code_temp = []
+										for i in c_etoile[0].values():
+											code_temp.append(i)
+										mm_temp.create_code_secret(code_temp) #liste
+										mm_temp.create_code_tentative(c[0]) #dico
+										mm_temp.comparaison()
+										S_copy_bis = deepcopy(S_copy)
+										while c_etoile in S_copy_bis:
+											S_copy_bis.remove(c_etoile)
+										for other_code in S_copy_bis:
+											mm_temp0 = Mastermind(n)
+											code_temp = []
+											for i in c[0].values():
+												code_temp.append(i)
+											mm_temp0.create_code_secret(code_temp) #liste
+											mm_temp0.create_code_tentative(other_code[0]) #dico
+											mm_temp0.comparaison()
+											S_copy_bis = deepcopy(S_copy)
+											if mm_temp.get_states()[len(mm_temp.get_states())][1] == mm_temp0.get_states()[len(mm_temp.get_states())][1] and mm_temp.get_states()[len(mm_temp.get_states())][2] == mm_temp0.get_states()[len(mm_temp.get_states())][2]:
+												remain += 1
+									estimations.append(remain)
+								#print("estimations :",estimations)
+								res,res_individu_fitness = E[estimations.index(min(estimations))]
+							elif strategie_algo_genetique == 4:
+								# Estimation du nombre de codes compatibles restants si un code était tenté
+								longueur_S = len(E)
+								estimations = []
+								S = []
+								E_copy = deepcopy(E)
+								for i in range(longueur_S):
+									if len(E_copy) == 0:
+										break
+									temp = random.choice(E_copy)
+									E_copy.remove(temp)
+									S.append(temp)
+								for c in E:
+									remain = 0
+									S_copy = deepcopy(S)
+									while c in S_copy:
+										S_copy.remove(c)
+									for c_etoile in S_copy:
+										mm_temp = Mastermind(n)
+										code_temp = []
+										for i in c_etoile[0].values():
+											code_temp.append(i)
+										mm_temp.create_code_secret(code_temp) #liste
+										mm_temp.create_code_tentative(c[0]) #dico
+										mm_temp.comparaison()
+										S_copy_bis = deepcopy(S_copy)
+										while c_etoile in S_copy_bis:
+											S_copy_bis.remove(c_etoile)
+										for other_code in S_copy_bis:
+											mm_temp0 = Mastermind(n)
+											code_temp = []
+											for i in c[0].values():
+												code_temp.append(i)
+											mm_temp0.create_code_secret(code_temp) #liste
+											mm_temp0.create_code_tentative(other_code[0]) #dico
+											mm_temp0.comparaison()
+											S_copy_bis = deepcopy(S_copy)
+											if mm_temp.get_states()[len(mm_temp.get_states())][1] == mm_temp0.get_states()[len(mm_temp.get_states())][1] and mm_temp.get_states()[len(mm_temp.get_states())][2] == mm_temp0.get_states()[len(mm_temp.get_states())][2]:
+												remain += 1
+									estimations.append(remain)
+								#print("estimations :",estimations)
+								res,res_individu_fitness = E[estimations.index(max(estimations))]
+							continuer = False
+				#print("res :",res)
+
+			#################################################################################################################################################################################################
+
+			elif (joueur == 9): # algorithme hybride
+
+				E = [] # ensemble de codes compatibles
+				res = {}
+				
+				if mastermind.get_nb_tentatives() == 0:
+					D_temp = D.copy()
+					for i in range(n):
+						temp = random.choice(D_temp)
+						res[i] = temp
+						D_temp.remove(temp)
+
+				else:
+					# Evaluation de l'historique en fonction du secret
+					population = []
+					nouvelle_population = []
+
+					start_time = time.time()
+
+					continuer = True
+					while(continuer):
+						for gen in range(maxgen):
+							#print("Génération",gen,":")
+							if gen > 0:
+								parents = []
+								population_temp = deepcopy(population)
+								for i in range( int(len(population)/2) ):
+									temp = min(population_temp, key = lambda t: t[1])
+									parents.append(temp)
+									population_temp.remove(temp)
+										
+							nouvelle_population[:] = []
+							for p in range(popsize):
+								#print("La population grandit, de taille",p+1)
+								individu = {}
+								if gen == 0:
+									D_temp = D.copy()
+									for i in range(n):
+										temp = random.choice(D_temp)
+										individu[i] = temp
+										D_temp.remove(temp)
+								else:
+									parents_temp = deepcopy(parents)
+									children = []
+									if random.random() < 0.5:
+										if random.random() < CXPB and len(parents_temp) >= 2:
+											separation = random.randint(1, n-1) # point du crossover
+											for i in range(2):
+												temp = random.choice(parents_temp)
+												temp2 = []
+												for k,v in temp[0].items():
+													temp2.append(v)
+												if i == 0:
+													child = temp2[:separation]
+												else:
+													child = temp2[separation:]	
+												children.append(child)
+												parents_temp.remove(temp)
+											fusion = children[0] + children[1]
+											for i in range(n):
+												individu[i] = fusion[i]
+										else:
+											individu_random = random.choice(parents_temp)[0]
+											for i in range(n):
+												individu[i] = individu_random[i]
+									else:
+										if random.random() < MUTPB:
+											temp_rand = random.random()
+											if temp_rand < 0.33: # mutation classique
+												child = random.choice(parents_temp)
+												alea = random.randint(0,len(child[0]))
+												child[0][alea] = random.choice(D)
+												for i in range(n):
+													individu[i] = child[0][i]
+											elif temp_rand < 0.66: # inversion de séquence
+												child = random.choice(parents_temp)
+												alea0 = random.randint(0,len(child[0])-1)
+												alea1 = random.randint(0,len(child[0]))
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												while(alea1-1 <= alea0):
+													alea0 = random.randint(0,len(child[0])-1)
+													alea1 = random.randint(0,len(child[0]))
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												temp = []
+												for k,v in child[0].items():
+													temp.append(v)
+												temp = temp[alea0:alea1]
+												temp.reverse()
+												#print("temp :",temp)
+												temp_indice = 0
+												for i in range(alea0,alea1):
+													child[0][i] = temp[temp_indice]
+													temp_indice += 1
+												#print("apres child :",child)
+												for i in range(n):
+													individu[i] = child[0][i]
+												#input()
+											else: # permutation
+												child = random.choice(parents_temp)
+												alea0 = random.randint(0,len(child[0])-1)
+												alea1 = random.randint(0,len(child[0])-1)
+												#print("avant child :",child,"alea0 :",alea0,"alea1:",alea1)
+												while(alea1 == alea0):
+													alea1 = random.randint(0,len(child[0])-1)
+												temp0 = child[0][alea0]
+												temp1 = child[0][alea1]
+												child[0][alea0] = temp1
+												child[0][alea1] = temp0
+												#print("apres child :",child)
+												for i in range(n):
+													individu[i] = child[0][i]
+										else:
+											individu_random = random.choice(parents_temp)[0]
+											for i in range(n):
+												individu[i] = individu_random[i]
+
+								# Test de l'individu par rapport aux tentatives
+								mm_temp = Mastermind(n)
+								fitness = 0
+								'''
+								difference_max_avant = 0
+								difference_max_apres = 0
+								'''
+								for t,s in mastermind.get_states().items():
+									code_temp = []
+									for i in s[0].values():
+										code_temp.append(i)
+									mm_temp.create_code_secret(code_temp)
+									mm_temp.create_code_tentative(individu)
+									mm_temp.comparaison()								
+									fitness += abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])
+									'''
+									difference_max_avant = abs(mastermind.get_states()[t][1] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][1]) + abs(mastermind.get_states()[t][2] - mm_temp.get_states()[mm_temp.get_nb_tentatives()][2])
+									if difference_max_avant > difference_max_apres:
+										difference_max_apres = difference_max_avant
+									'''
+								nouvelle_population.append((individu,fitness))
+
+							# Nouvelle population :
+
+							# remplacer entièrement
+							population[:] = nouvelle_population
+							'''
+							# prendre les 50% meilleures
+							if gen > 0:
+								meilleure_population = [] # enfants
+								copie_population = deepcopy(nouvelle_population)
+								for i in range(int(popsize/2)):
+									enfant_individu,enfant_fitness = min(copie_population, key = lambda t: t[1])
+									meilleure_population.append((enfant_individu,enfant_fitness))
+									copie_population.remove((enfant_individu,enfant_fitness))
+								for i in range((popsize-int(popsize/2))):
+									parent_individu,parent_fitness = max(population, key = lambda t: t[1])
+									enfant_individu,enfant_fitness = min(meilleure_population, key = lambda t: t[1])
+									if parent_fitness < enfant_fitness:
+										population.remove((parent_individu,parent_fitness))
+										population.append((enfant_individu,enfant_fitness))
+										meilleure_population.remove((enfant_individu,enfant_fitness))
+									else:
+										break
+							else:
+								population[:] = nouvelle_population
+							'''
+							#print("population :",population)
+
+							# sélectif du hall of fame compatible à mettre dans E
+							population_copie = deepcopy(population)
+							for i in range(len(population_copie)):
+								hof_individu,hof_fitness = min(population_copie, key = lambda t: t[1])								
+								if hof_fitness != 0: # ça ne sert à rien de continuer
+									break
+								population_copie.remove((hof_individu,hof_fitness))	
+								if (hof_individu,hof_fitness) in E: # évite de remettre le même code dans E
+									continue
+								# vérification de la consistance locale (caractères uniques)
+								uniques_values = []
+								for key, d in hof_individu.items():
+									if d[0] not in uniques_values:
+										uniques_values.append(d[0])
+								if len(uniques_values) == len(hof_individu): # si caractères uniques alors on append
+									E.append((hof_individu,hof_fitness))
+									if len(E) >= maxsize: # si on dépasse maxsize après l'append, on break
+										break
+
+							if len(E) >= maxsize:
+								break
+
+							# CSP mi génétique
+							if len(E) < maxsize: # seuil facultatif, à mettre inférieur à maxsize pour l'annuler
+								for pc in range(int(len(population_copie)/10)):
+									#print(pc)
+									individu_dico,fitness = min(population_copie, key = lambda t: t[1])
+									population_copie.remove((individu_dico,fitness))
+									#print(individu_dico,fitness)
+									individu_liste = []
+									for key, d in individu_dico.items():
+										individu_liste.append(d[0])
+									#print("code_secret :",code_secret)
+									#print("states :",mastermind.get_states())
+									#print("avant individu_liste :",individu_liste)
+									#print("difference_max_apres :",difference_max_apres)
+									#for fit in range(1,fitness+1):
+									for fit in range(1,int(n/2)):
+									#for fit in range(1,difference_max_apres+1):
+										#print("fit :",fit)
+										del individu_liste[-1]
+									#print("apres individu_liste :",individu_liste)
+									while len(set(individu_liste)) != len(individu_liste):
+										fit += 1
+										del individu_liste[-1]
+									i = individu_liste
+									nbreVar = len(individu_liste) - fit
+									D_CSP = D.copy()
+									for dcsp in individu_liste:
+										D_CSP.remove(dcsp)
+									individu,nbre_noeuds_temp,compatible = RAC_forward_checking_ameliore_AG(i,nbreVar,D_CSP,n,mastermind.get_states())
+									nbre_noeuds += nbre_noeuds_temp
+									if compatible == True and (individu,0) not in E:
+										#print("j'ajoute dans E le code",individu)
+										#input()
+										E.append((individu,0))
+										#print(E)
+										if len(E) >= maxsize:
+											break
+
+							if len(E) >= maxsize:
+								break
+
+						#print("dernière population :",population)
+						#print("E :",E)
+						if len(E) == 0:
+							temp_time = (time.time() - start_time)
+							#print("E vide : Temps d'exécution : %s secondes ---" % temp_time)
+							if temp_time > 300:
+								continuer = False
+								print("Echec de l'algorithme génétique. \n")
+								# On pourrait donner la main à l'algorithme A5 (ou A7) ici
+								'''
+								res = {}
+								if mastermind.get_nb_tentatives() == 0:
+									res = premiere_tentative
+								else:
 									i = []
 									nbreVar = n
 									states = mastermind.get_states()
@@ -1895,6 +2334,92 @@ def graphe2_3(tailles_n,nbre_instances,meilleure_strategie_partie_1,strategie_al
 	plt.show()
 
 #################################################################################################################################################################################################
+
+def graphe3(tailles_n,nbre_instances,meilleure_strategie_partie_1,strategie_algo_genetique,maxsize,maxgen,popsize,cxpb,mutpb):
+	x = []
+	yA_temps = []
+	yAG_temps = []
+	yAH_temps = []
+	yA_nb_tentatives = []
+	yAG_nb_tentatives = []
+	yAH_nb_tentatives = []
+	yA_nb_noeuds = []
+	yAH_nb_noeuds = []
+	for n in tailles_n:
+		x.append(n)
+		temps_A = 0
+		temps_AG = 0
+		temps_AH = 0
+		nb_tentatives_A = 0
+		nb_tentatives_AG = 0
+		nb_tentatives_AH = 0
+		nb_noeuds_A = 0
+		nb_noeuds_AH = 0
+		for i in range(nbre_instances):
+			mm_temp = Mastermind(n)
+			mm_temp.create_code_secret_random()
+			code_secret = mm_temp.get_code_secret()
+			mm_temp0 = Mastermind(n)
+			mm_temp0.create_code_secret_random()
+			premiere_tentative_liste = mm_temp0.get_code_secret()
+			premiere_tentative = {}
+			for i in range(len(premiere_tentative_liste)):
+				premiere_tentative[i] = premiere_tentative_liste[i]
+			start_time = time.time()
+			nb_tentativesA,nb_noeudsA = run(n,meilleure_strategie_partie_1,code_secret,premiere_tentative)
+			temps_A += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAG,nb_noeudsAG = run(n=n,joueur=8,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+			temps_AG += time.time() - start_time
+			start_time = time.time()
+			nb_tentativesAH,nb_noeudsAH = run(n=n,joueur=9,code_secret=code_secret,premiere_tentative=premiere_tentative,strategie_algo_genetique=strategie_algo_genetique,maxsize=maxsize,maxgen=maxgen,popsize=popsize,CXPB=cxpb,MUTPB=mutpb) 
+			temps_AH += time.time() - start_time
+			nb_tentatives_A += nb_tentativesA
+			nb_tentatives_AG += nb_tentativesAG
+			nb_tentatives_AH += nb_tentativesAH
+			nb_noeuds_A += nb_noeudsA
+			nb_noeuds_AH += nb_noeudsAH
+		yA_temps.append(temps_A/nbre_instances)
+		yAG_temps.append(temps_AG/nbre_instances)
+		yAH_temps.append(temps_AH/nbre_instances)
+		yA_nb_tentatives.append(nb_tentatives_A/nbre_instances)
+		yAG_nb_tentatives.append(nb_tentatives_AG/nbre_instances)
+		yAH_nb_tentatives.append(nb_tentatives_AH/nbre_instances)
+		yA_nb_noeuds.append(nb_noeuds_A/nbre_instances)
+		yAH_nb_noeuds.append(nb_noeuds_AH/nbre_instances)
+
+	plt.title("Evolution du temps moyen de résolution lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Temps moyen en secondes")
+	plt.plot(x, yA_temps, c="green", label="A")
+	plt.plot(x, yAG_temps, c="red", label="AG")
+	plt.plot(x, yAH_temps, c="blue", label="AH")
+	plt.legend()
+	plt.grid()
+	plt.savefig("3_temps.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen d’essais nécessaires lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen d’essais")
+	plt.plot(x, yA_nb_tentatives, c="green", label="A")
+	plt.plot(x, yAG_nb_tentatives, c="red", label="AG")
+	plt.plot(x, yAH_nb_tentatives, c="blue", label="AH")
+	plt.legend()
+	plt.grid()
+	plt.savefig("3_nb_tentatives.png")
+	plt.show()
+
+	plt.title("Evolution du nombre moyen de noeuds lorsque n et p augmentent")
+	plt.xlabel("Taille n")
+	plt.ylabel("Nombre moyen de noeuds")
+	plt.plot(x, yA_nb_noeuds, c="green", label="A")
+	plt.plot(x, yAH_nb_noeuds, c="blue", label="AH")
+	plt.legend()
+	plt.grid()
+	plt.savefig("3_nb_noeuds.png")
+	plt.show()
+
 #################################################################################################################################################################################################
 #################################################################################################################################################################################################
 #################################################################################################################################################################################################
