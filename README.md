@@ -1,4 +1,4 @@
-M1 ANDROIDE : Projet de l'UE "Résolution de problèmes"
+#M1 ANDROIDE : Projet de l'UE "Résolution de problèmes"
 
 Satisfaction de contraintes pour le Master Mind
 
